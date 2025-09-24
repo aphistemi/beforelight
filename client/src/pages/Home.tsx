@@ -96,7 +96,7 @@ export default function Home() {
               textShadow: '0 2px 20px rgba(0,0,0,0.8)'
             }}
           >
-            <div>We're swaying to drum beats</div>
+            <div className="whitespace-nowrap">We're swaying to drum beats</div>
             <div><em className="text-white/70">In motion, I'm feeling..</em></div>
           </div>
         </div>
