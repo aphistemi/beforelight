@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { Volume2, VolumeX } from 'lucide-react';
 
 interface VideoSectionProps {
   title?: string;
@@ -8,7 +9,10 @@ interface VideoSectionProps {
 export default function VideoSection({ title, description }: VideoSectionProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
   const sectionRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
@@ -28,6 +32,46 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
     return () => observer.disconnect();
   }, []);
 
+  // Focus detection based on scroll position
+  useEffect(() => {
+    let animationFrameId: number;
+    
+    const handleScroll = () => {
+      if (!containerRef.current) return;
+      
+      const containerRect = containerRef.current.getBoundingClientRect();
+      const containerCenter = containerRect.top + containerRect.height / 2;
+      const viewportCenter = window.innerHeight / 2;
+      const distance = Math.abs(containerCenter - viewportCenter);
+      const threshold = window.innerHeight * 0.2;
+      
+      const shouldFocus = distance < threshold && containerRect.top < viewportCenter && containerRect.bottom > viewportCenter;
+      
+      if (shouldFocus !== isFocused) {
+        setIsFocused(shouldFocus);
+        
+        // Auto-play when focused (but keep muted)
+        if (shouldFocus && videoRef.current?.paused) {
+          videoRef.current.play();
+          setIsPlaying(true);
+        }
+      }
+    };
+    
+    const throttledScroll = () => {
+      animationFrameId = requestAnimationFrame(() => {
+        handleScroll();
+        throttledScroll();
+      });
+    };
+    
+    throttledScroll();
+    
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+    };
+  }, [isFocused]);
+
   const handlePlayClick = () => {
     if (videoRef.current) {
       if (isPlaying) {
@@ -37,6 +81,14 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
         videoRef.current.play();
         setIsPlaying(true);
       }
+    }
+  };
+
+  const handleMuteClick = () => {
+    if (videoRef.current) {
+      const newMutedState = !isMuted;
+      videoRef.current.muted = newMutedState;
+      setIsMuted(newMutedState);
     }
   };
 
@@ -70,9 +122,22 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
           </div>
         )}
         
+        {/* Focus overlay - dims the page when video is focused */}
+        {isFocused && (
+          <div 
+            className="fixed inset-0 z-50 bg-black/70 transition-opacity duration-500"
+            data-testid="overlay-video-focus"
+          />
+        )}
+        
         <div 
-          className={`relative aspect-video bg-black rounded-sm overflow-hidden transition-all duration-1000 delay-300 ${
+          ref={containerRef}
+          className={`relative aspect-video bg-black overflow-hidden transition-all duration-700 ease-out ${
             isVisible ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0'
+          } ${
+            isFocused 
+              ? 'scale-[1.12] sm:scale-[1.15] z-[60] rounded-none shadow-[0_20px_80px_rgba(0,0,0,0.8)]' 
+              : 'rounded-sm z-10'
           }`}
         >
           {/* Actual video */}
@@ -80,7 +145,7 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
             ref={videoRef}
             className="w-full h-full object-cover"
             loop
-            muted
+            muted={isMuted}
             playsInline
             autoPlay
             poster=""
@@ -89,6 +154,20 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
             Your browser does not support the video tag.
           </video>
           
+          {/* Mute/unmute button - always visible */}
+          <button
+            onClick={handleMuteClick}
+            className="absolute top-4 right-4 z-10 w-12 h-12 bg-black/40 hover:bg-black/60 backdrop-blur-sm rounded-full flex items-center justify-center group hover-elevate transition-all duration-300"
+            data-testid="button-video-sound"
+            aria-label={isMuted ? "Unmute video" : "Mute video"}
+          >
+            {isMuted ? (
+              <VolumeX className="w-5 h-5 text-white/80 group-hover:text-white" />
+            ) : (
+              <Volume2 className="w-5 h-5 text-white/80 group-hover:text-white" />
+            )}
+          </button>
+
           {/* Play/pause overlay */}
           <button
             onClick={handlePlayClick}
