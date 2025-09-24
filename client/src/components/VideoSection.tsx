@@ -207,7 +207,6 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
               loop
               muted={false}
               playsInline
-              poster="/video-thumbnail.png"
               preload="metadata"
               controls={true}
               webkit-playsinline="true"
@@ -217,7 +216,7 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
               onCanPlay={() => console.log('iOS Video can play')}
               onLoadedData={() => setVideoLoaded(true)}
               onError={(e) => console.log('iOS Video error:', e)}
-              src="/video/afterdark1.mp4"
+              src="/afterdark1.mp4"
             >
               Your browser does not support the video tag.
             </video>
@@ -229,7 +228,6 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
               loop
               muted={isMuted}
               playsInline
-              poster="/video-thumbnail.png"
               preload="metadata"
               webkit-playsinline="true"
               controls={false}
@@ -239,7 +237,7 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
               onCanPlay={() => console.log('Video can play')}
               onLoadedData={() => setVideoLoaded(true)}
               onError={(e) => console.log('Video error:', e)}
-              src="/video/afterdark1.mp4"
+              src="/afterdark1.mp4"
             >
               Your browser does not support the video tag.
             </video>
