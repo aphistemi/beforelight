@@ -11,9 +11,15 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
   const [isPlaying, setIsPlaying] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
+  const [isIOS, setIsIOS] = useState(false);
   const sectionRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+
+  // Detect iOS
+  useEffect(() => {
+    setIsIOS(/(iPhone|iPad|iPod|iOS)/i.test(navigator.userAgent));
+  }, []);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -68,14 +74,34 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
     };
   }, [isFocused]);
 
-  const handlePlayClick = () => {
+  const handlePlayClick = async () => {
     if (videoRef.current) {
-      if (isPlaying) {
-        videoRef.current.pause();
-        setIsPlaying(false);
-      } else {
-        videoRef.current.play();
-        setIsPlaying(true);
+      try {
+        if (isPlaying) {
+          videoRef.current.pause();
+          setIsPlaying(false);
+        } else {
+          const isIOS = /(iPhone|iPad|iPod|iOS)/i.test(navigator.userAgent);
+          
+          if (isIOS) {
+            // iOS-specific handling
+            videoRef.current.load();
+            videoRef.current.muted = false; // Unmute for iOS
+            setIsMuted(false);
+          }
+          
+          await videoRef.current.play();
+          setIsPlaying(true);
+        }
+      } catch (error) {
+        console.log('Video play error:', error);
+        // Fallback: try without async
+        if (!isPlaying && videoRef.current) {
+          videoRef.current.play().catch(() => {
+            console.log('Video playback failed - check iOS restrictions');
+          });
+          setIsPlaying(true);
+        }
       }
     }
   };
@@ -118,8 +144,8 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
           </div>
         )}
         
-        {/* Focus overlay - dims the page when video is focused */}
-        {isFocused && (
+        {/* Focus overlay - dims the page when video is focused (disabled on iOS for compatibility) */}
+        {isFocused && !/(iPhone|iPad|iPod|iOS)/i.test(navigator.userAgent) && (
           <div 
             className="fixed inset-0 z-50 bg-black/70 transition-opacity duration-500"
             data-testid="overlay-video-focus"
@@ -131,8 +157,8 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
           className={`relative aspect-video bg-black overflow-hidden transition-all duration-700 ease-out ${
             isVisible ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0'
           } ${
-            isFocused 
-              ? 'scale-[1.15] sm:scale-[1.18] z-[60] rounded-none shadow-[0_20px_80px_rgba(0,0,0,0.8)]' 
+            isFocused && !/(iPhone|iPad|iPod|iOS)/i.test(navigator.userAgent)
+              ? 'scale-105 sm:scale-110 z-[60] rounded-none shadow-[0_20px_60px_rgba(0,0,0,0.6)]' 
               : 'rounded-sm z-10'
           }`}
         >
@@ -144,8 +170,17 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
             muted={isMuted}
             playsInline
             poster="/video-thumbnail.png"
+            preload="metadata"
+            webkit-playsinline="true"
+            controls={isIOS && isPlaying}
+            onPlay={() => setIsPlaying(true)}
+            onPause={() => setIsPlaying(false)}
+            onLoadStart={() => console.log('Video loading...')}
+            onCanPlay={() => console.log('Video can play')}
+            onError={(e) => console.log('Video error:', e)}
           >
             <source src="/afterdark1.webm" type="video/webm" />
+            {!isIOS && <source src="/afterdark1.webm" type="video/mp4" />}
             Your browser does not support the video tag.
           </video>
           
