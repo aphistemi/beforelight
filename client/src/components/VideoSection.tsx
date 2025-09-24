@@ -12,6 +12,7 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
   const [isFocused, setIsFocused] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
+  const [videoLoaded, setVideoLoaded] = useState(false);
   const sectionRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -20,6 +21,34 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
   useEffect(() => {
     setIsIOS(/(iPhone|iPad|iPod|iOS)/i.test(navigator.userAgent));
   }, []);
+
+  // iOS video loading handler
+  useEffect(() => {
+    if (isIOS && videoRef.current) {
+      const video = videoRef.current;
+      
+      const handleLoadedData = () => {
+        setVideoLoaded(true);
+        console.log('iOS video loaded successfully');
+      };
+      
+      const handleError = (e: any) => {
+        console.log('iOS video error:', e);
+        setVideoLoaded(false);
+      };
+      
+      video.addEventListener('loadeddata', handleLoadedData);
+      video.addEventListener('error', handleError);
+      
+      // Force load for iOS
+      video.load();
+      
+      return () => {
+        video.removeEventListener('loadeddata', handleLoadedData);
+        video.removeEventListener('error', handleError);
+      };
+    }
+  }, [isIOS]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -177,10 +206,22 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
             onPause={() => setIsPlaying(false)}
             onLoadStart={() => console.log('Video loading...')}
             onCanPlay={() => console.log('Video can play')}
+            onLoadedData={() => setVideoLoaded(true)}
             onError={(e) => console.log('Video error:', e)}
           >
-            <source src="/afterdark1.webm" type="video/webm" />
-            {!isIOS && <source src="/afterdark1.webm" type="video/mp4" />}
+            {isIOS ? (
+              // iOS: Use MP4 first, fallback to WebM
+              <>
+                <source src="/afterdark1.mp4" type="video/mp4" />
+                <source src="/afterdark1.webm" type="video/webm" />
+              </>
+            ) : (
+              // Other browsers: Use WebM first
+              <>
+                <source src="/afterdark1.webm" type="video/webm" />
+                <source src="/afterdark1.mp4" type="video/mp4" />
+              </>
+            )}
             Your browser does not support the video tag.
           </video>
           
