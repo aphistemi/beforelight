@@ -143,25 +143,25 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
             loop
             muted={isMuted}
             playsInline
-            poster=""
+            poster="/video-thumbnail.png"
           >
             <source src="/afterdark1.webm" type="video/webm" />
             Your browser does not support the video tag.
           </video>
           
-          {/* Custom video preview/thumbnail */}
+          {/* Subtle play overlay over thumbnail */}
           {!isPlaying && (
-            <div className="absolute inset-0 bg-gradient-to-br from-black/60 via-black/40 to-black/80 flex items-center justify-center">
+            <div className="absolute inset-0 bg-black/20 flex items-center justify-center group-hover:bg-black/30 transition-all duration-300">
               <div className="text-center">
                 {/* Large play button */}
-                <div className="w-24 h-24 md:w-32 md:h-32 mx-auto mb-6 border-2 border-white/70 rounded-full flex items-center justify-center group-hover:border-white group-hover:scale-110 transition-all duration-300 backdrop-blur-sm bg-black/20">
-                  <div className="w-0 h-0 border-l-[12px] md:border-l-[16px] border-l-white/80 border-t-[8px] md:border-t-[10px] border-t-transparent border-b-[8px] md:border-b-[10px] border-b-transparent ml-2" />
+                <div className="w-20 h-20 md:w-24 md:h-24 mx-auto mb-4 border-2 border-white/80 rounded-full flex items-center justify-center group-hover:border-white group-hover:scale-110 transition-all duration-300 backdrop-blur-sm bg-black/30">
+                  <div className="w-0 h-0 border-l-[10px] md:border-l-[12px] border-l-white/90 border-t-[7px] md:border-t-[8px] border-t-transparent border-b-[7px] md:border-b-[8px] border-b-transparent ml-1" />
                 </div>
                 
                 {/* Play text */}
-                <div className="text-white/90">
-                  <div className="text-lg md:text-xl font-light tracking-[0.3em] mb-2">PLAY VIDEO</div>
-                  <div className="text-sm text-white/60 font-light tracking-wide">Experience in motion</div>
+                <div className="text-white/95">
+                  <div className="text-base md:text-lg font-light tracking-[0.3em] mb-1">PLAY</div>
+                  <div className="text-xs text-white/70 font-light tracking-wide">Experience in motion</div>
                 </div>
               </div>
             </div>
