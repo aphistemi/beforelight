@@ -118,6 +118,9 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
         console.log('Video paused');
       } else {
         console.log('Starting video play...');
+        console.log('Video readyState before play:', videoRef.current.readyState);
+        console.log('Video duration before play:', videoRef.current.duration);
+        console.log('Video current src:', videoRef.current.currentSrc);
         
         // Simple play for all devices
         if (isIOS) {
@@ -125,7 +128,8 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
           console.log('iOS controls enabled');
         }
         
-        await videoRef.current.play();
+        const playResult = await videoRef.current.play();
+        console.log('Play promise result:', playResult);
         setIsPlaying(true);
         console.log('Video playing successfully');
       }
@@ -198,15 +202,40 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
             preload="metadata"
             muted
             playsInline
-            onPlay={() => setIsPlaying(true)}
-            onPause={() => setIsPlaying(false)}
+            onPlay={() => {
+              console.log('Video started playing!');
+              setIsPlaying(true);
+            }}
+            onPause={() => {
+              console.log('Video paused!');
+              setIsPlaying(false);
+            }}
             onLoadStart={() => console.log('Video loading...')}
-            onLoadedData={() => setVideoLoaded(true)}
-            onError={(e) => console.log('Video error:', e)}
-            onLoadedMetadata={() => console.log('Video metadata loaded!')}
+            onLoadedData={() => {
+              console.log('Video data loaded!');
+              setVideoLoaded(true);
+            }}
+            onError={(e) => {
+              console.log('Video error:', e);
+              const video = e.target as HTMLVideoElement;
+              console.log('Video error details:', video?.error);
+            }}
+            onLoadedMetadata={(e) => {
+              console.log('Video metadata loaded!');
+              const video = e.target as HTMLVideoElement;
+              console.log('Video duration:', video?.duration);
+              console.log('Video readyState:', video?.readyState);
+            }}
+            onCanPlay={() => console.log('Video can play!')}
+            onCanPlayThrough={() => console.log('Video can play through!')}
+            onTimeUpdate={() => {
+              if (videoRef.current) {
+                console.log('Video time:', videoRef.current.currentTime);
+              }
+            }}
           >
+            <source src="/video/afterdark1_small.mp4" type="video/mp4" />
             <source src="/video/afterdark1.mp4" type="video/mp4" />
-            <source src="/video/afterdark1.webm" type="video/webm" />
             Your browser does not support the video tag.
           </video>
           
