@@ -89,14 +89,14 @@ export default function Home() {
             rgba(0,0,0,0.95) 100%)`
         }}
       >
-        <div className="text-center max-w-2xl px-8">
+        <div className="text-center max-w-2xl px-4 sm:px-8">
           <div 
-            className="text-3xl md:text-5xl font-light tracking-wide text-white/90 leading-relaxed font-[Inter]"
+            className="text-2xl sm:text-3xl md:text-5xl font-light tracking-wide text-white/90 leading-relaxed font-[Inter]"
             style={{
               textShadow: '0 2px 20px rgba(0,0,0,0.8)'
             }}
           >
-            <div className="whitespace-nowrap">We're swaying to drum beats</div>
+            <div className="sm:whitespace-nowrap">We're swaying to drum beats</div>
             <div><em className="text-white/70">In motion, I'm feeling..</em></div>
           </div>
         </div>

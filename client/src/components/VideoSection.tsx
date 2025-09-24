@@ -43,7 +43,7 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
       const containerCenter = containerRect.top + containerRect.height / 2;
       const viewportCenter = window.innerHeight / 2;
       const distance = Math.abs(containerCenter - viewportCenter);
-      const threshold = window.innerHeight * 0.2;
+      const threshold = window.innerHeight * 0.15; // More sensitive on mobile
       
       const shouldFocus = distance < threshold && containerRect.top < viewportCenter && containerRect.bottom > viewportCenter;
       
@@ -132,7 +132,7 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
             isVisible ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0'
           } ${
             isFocused 
-              ? 'scale-[1.12] sm:scale-[1.15] z-[60] rounded-none shadow-[0_20px_80px_rgba(0,0,0,0.8)]' 
+              ? 'scale-[1.15] sm:scale-[1.18] z-[60] rounded-none shadow-[0_20px_80px_rgba(0,0,0,0.8)]' 
               : 'rounded-sm z-10'
           }`}
         >
@@ -151,7 +151,7 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
           
           {/* Subtle play overlay over thumbnail */}
           {!isPlaying && (
-            <div className="absolute inset-0 bg-black/20 flex items-center justify-center group-hover:bg-black/30 transition-all duration-300">
+            <div className="absolute inset-0 bg-black/20 flex items-center justify-center group-hover:bg-black/30 transition-all duration-300 pointer-events-none">
               <div className="text-center">
                 {/* Large play button */}
                 <div className="w-20 h-20 md:w-24 md:h-24 mx-auto mb-4 border-2 border-white/80 rounded-full flex items-center justify-center group-hover:border-white group-hover:scale-110 transition-all duration-300 backdrop-blur-sm bg-black/30">
@@ -186,10 +186,12 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
           {/* Play/pause overlay - covers entire video */}
           <button
             onClick={handlePlayClick}
-            className="absolute inset-0 group hover-elevate transition-all duration-300 bg-black/0 hover:bg-black/5"
+            className="absolute inset-0 z-20 transition-all duration-300 bg-transparent hover:bg-black/5 cursor-pointer"
             data-testid="button-video-play"
+            aria-label="Play video"
+            style={{ minHeight: '100%', minWidth: '100%' }}
           >
-            {/* This button is invisible but covers the whole video for easy clicking */}
+            {/* This button covers the whole video for easy clicking */}
           </button>
         </div>
       </div>
