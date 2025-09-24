@@ -82,9 +82,10 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
             loop
             muted
             playsInline
+            autoPlay
             poster=""
           >
-            <source src="/attached_assets/afterdark1_1758731166481.webm" type="video/webm" />
+            <source src="/afterdark1.webm" type="video/webm" />
             Your browser does not support the video tag.
           </video>
           
