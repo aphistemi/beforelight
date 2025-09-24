@@ -110,26 +110,36 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
           videoRef.current.pause();
           setIsPlaying(false);
         } else {
-          const isIOS = /(iPhone|iPad|iPod|iOS)/i.test(navigator.userAgent);
-          
           if (isIOS) {
-            // iOS-specific handling
+            // iOS-specific: Force reload and set properties
             videoRef.current.load();
-            videoRef.current.muted = false; // Unmute for iOS
+            videoRef.current.muted = false;
+            videoRef.current.preload = 'auto';
             setIsMuted(false);
+            
+            // Wait for video to be ready
+            await new Promise((resolve) => {
+              if (videoRef.current!.readyState >= 3) {
+                resolve(true);
+              } else {
+                videoRef.current!.addEventListener('canplay', () => resolve(true), { once: true });
+              }
+            });
           }
           
-          await videoRef.current.play();
-          setIsPlaying(true);
+          const playPromise = videoRef.current.play();
+          
+          if (playPromise !== undefined) {
+            await playPromise;
+            setIsPlaying(true);
+          }
         }
       } catch (error) {
         console.log('Video play error:', error);
-        // Fallback: try without async
-        if (!isPlaying && videoRef.current) {
-          videoRef.current.play().catch(() => {
-            console.log('Video playback failed - check iOS restrictions');
-          });
-          setIsPlaying(true);
+        // iOS fallback: Use native controls
+        if (isIOS && videoRef.current) {
+          videoRef.current.controls = true;
+          console.log('Switched to native iOS controls due to playback error');
         }
       }
     }
@@ -192,41 +202,56 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
           }`}
         >
           {/* Actual video */}
-          <video
-            ref={videoRef}
-            className="w-full h-full object-cover"
-            loop
-            muted={isMuted}
-            playsInline
-            poster="/video-thumbnail.png"
-            preload="metadata"
-            webkit-playsinline="true"
-            controls={isIOS && isPlaying}
-            onPlay={() => setIsPlaying(true)}
-            onPause={() => setIsPlaying(false)}
-            onLoadStart={() => console.log('Video loading...')}
-            onCanPlay={() => console.log('Video can play')}
-            onLoadedData={() => setVideoLoaded(true)}
-            onError={(e) => console.log('Video error:', e)}
-          >
-            {isIOS ? (
-              // iOS: Use MP4 first, fallback to WebM
-              <>
-                <source src="/afterdark1.mp4" type="video/mp4" />
-                <source src="/afterdark1.webm" type="video/webm" />
-              </>
-            ) : (
-              // Other browsers: Use WebM first
-              <>
-                <source src="/afterdark1.webm" type="video/webm" />
-                <source src="/afterdark1.mp4" type="video/mp4" />
-              </>
-            )}
-            Your browser does not support the video tag.
-          </video>
+          {isIOS ? (
+            // iOS-specific video element with native controls always visible
+            <video
+              ref={videoRef}
+              className="w-full h-full object-cover"
+              loop
+              muted={false}
+              playsInline
+              poster="/video-thumbnail.png"
+              preload="metadata"
+              controls={true}
+              webkit-playsinline="true"
+              onPlay={() => setIsPlaying(true)}
+              onPause={() => setIsPlaying(false)}
+              onLoadStart={() => console.log('iOS Video loading...')}
+              onCanPlay={() => console.log('iOS Video can play')}
+              onLoadedData={() => setVideoLoaded(true)}
+              onError={(e) => console.log('iOS Video error:', e)}
+            >
+              <source src="/afterdark1.mp4" type="video/mp4" />
+              <source src="/afterdark1.webm" type="video/webm" />
+              Your browser does not support the video tag.
+            </video>
+          ) : (
+            // Desktop/other browsers
+            <video
+              ref={videoRef}
+              className="w-full h-full object-cover"
+              loop
+              muted={isMuted}
+              playsInline
+              poster="/video-thumbnail.png"
+              preload="metadata"
+              webkit-playsinline="true"
+              controls={false}
+              onPlay={() => setIsPlaying(true)}
+              onPause={() => setIsPlaying(false)}
+              onLoadStart={() => console.log('Video loading...')}
+              onCanPlay={() => console.log('Video can play')}
+              onLoadedData={() => setVideoLoaded(true)}
+              onError={(e) => console.log('Video error:', e)}
+            >
+              <source src="/afterdark1.webm" type="video/webm" />
+              <source src="/afterdark1.mp4" type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+          )}
           
-          {/* Subtle play overlay over thumbnail */}
-          {!isPlaying && (
+          {/* Subtle play overlay over thumbnail - hidden on iOS since we use native controls */}
+          {!isPlaying && !isIOS && (
             <div className="absolute inset-0 bg-black/20 flex items-center justify-center group-hover:bg-black/30 transition-all duration-300 pointer-events-none">
               <div className="text-center">
                 {/* Large play button */}
@@ -243,8 +268,8 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
             </div>
           )}
           
-          {/* Mute/unmute button - only visible when playing */}
-          {isPlaying && (
+          {/* Mute/unmute button - only visible when playing and not on iOS */}
+          {isPlaying && !isIOS && (
             <button
               onClick={handleMuteClick}
               className="absolute top-4 right-4 z-10 w-12 h-12 bg-black/40 hover:bg-black/60 backdrop-blur-sm rounded-full flex items-center justify-center group hover-elevate transition-all duration-300"
@@ -259,16 +284,18 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
             </button>
           )}
 
-          {/* Play/pause overlay - covers entire video */}
-          <button
-            onClick={handlePlayClick}
-            className="absolute inset-0 z-20 transition-all duration-300 bg-transparent hover:bg-black/5 cursor-pointer"
-            data-testid="button-video-play"
-            aria-label="Play video"
-            style={{ minHeight: '100%', minWidth: '100%' }}
-          >
-            {/* This button covers the whole video for easy clicking */}
-          </button>
+          {/* Play/pause overlay - covers entire video (hidden on iOS to avoid conflicts with native controls) */}
+          {!isIOS && (
+            <button
+              onClick={handlePlayClick}
+              className="absolute inset-0 z-20 transition-all duration-300 bg-transparent hover:bg-black/5 cursor-pointer"
+              data-testid="button-video-play"
+              aria-label="Play video"
+              style={{ minHeight: '100%', minWidth: '100%' }}
+            >
+              {/* This button covers the whole video for easy clicking */}
+            </button>
+          )}
         </div>
       </div>
     </section>
