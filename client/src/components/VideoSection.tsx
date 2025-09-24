@@ -101,44 +101,26 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
   }, [isFocused]);
 
   const handlePlayClick = async () => {
-    if (videoRef.current) {
-      try {
-        if (isPlaying) {
-          videoRef.current.pause();
-          setIsPlaying(false);
-        } else {
-          if (isIOS) {
-            // iOS-specific: Force reload and set properties
-            videoRef.current.load();
-            videoRef.current.muted = false;
-            videoRef.current.preload = 'auto';
-            setIsMuted(false);
-            
-            // Wait for video to be ready
-            await new Promise((resolve) => {
-              if (videoRef.current!.readyState >= 3) {
-                resolve(true);
-              } else {
-                videoRef.current!.addEventListener('canplay', () => resolve(true), { once: true });
-              }
-            });
-          }
-          
-          const playPromise = videoRef.current.play();
-          
-          if (playPromise !== undefined) {
-            await playPromise;
-            setIsPlaying(true);
-          }
+    if (!videoRef.current) return;
+    
+    try {
+      console.log('Play video clicked');
+      
+      if (isPlaying) {
+        videoRef.current.pause();
+        setIsPlaying(false);
+      } else {
+        // Simple play for all devices
+        if (isIOS) {
+          videoRef.current.controls = true; // Show native controls on iOS after first play
         }
-      } catch (error) {
-        console.log('Video play error:', error);
-        // iOS fallback: Use native controls
-        if (isIOS && videoRef.current) {
-          videoRef.current.controls = true;
-          console.log('Switched to native iOS controls due to playback error');
-        }
+        
+        await videoRef.current.play();
+        setIsPlaying(true);
+        console.log('Video playing successfully');
       }
+    } catch (error) {
+      console.error('Error playing video:', error);
     }
   };
 
@@ -198,12 +180,13 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
               : 'rounded-sm z-10'
           }`}
         >
-          {/* Video with custom controls */}
+          {/* Video with thumbnail and streaming */}
           <video
             ref={videoRef}
             className="w-full h-full object-cover"
-            controls={isIOS ? true : false}
-            muted={!isIOS}
+            poster="/video-thumbnail.png"
+            preload="metadata"
+            muted
             playsInline
             onPlay={() => setIsPlaying(true)}
             onPause={() => setIsPlaying(false)}
@@ -212,13 +195,13 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
             onError={(e) => console.log('Video error:', e)}
             onLoadedMetadata={() => console.log('Video metadata loaded!')}
           >
-            <source src="/afterdark1.mp4" type="video/mp4" />
-            <source src="/afterdark1.webm" type="video/webm" />
+            <source src="/video/afterdark1.mp4" type="video/mp4" />
+            <source src="/video/afterdark1.webm" type="video/webm" />
             Your browser does not support the video tag.
           </video>
           
-          {/* Custom play overlay - only on desktop */}
-          {!isPlaying && !isIOS && (
+          {/* Custom play overlay - shows on all devices until video starts */}
+          {!isPlaying && (
             <div className="absolute inset-0 bg-black/20 flex items-center justify-center group-hover:bg-black/30 transition-all duration-300 pointer-events-none">
               <div className="text-center">
                 {/* Large play button */}
@@ -236,7 +219,7 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
           )}
           
 
-          {/* Mute/unmute button - only visible when playing and not on iOS */}
+          {/* Mute/unmute button - only visible when playing on desktop */}
           {isPlaying && !isIOS && (
             <button
               onClick={handleMuteClick}
