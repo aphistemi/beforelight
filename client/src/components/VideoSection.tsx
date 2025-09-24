@@ -13,8 +13,6 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
   const [isMuted, setIsMuted] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
   const [videoLoaded, setVideoLoaded] = useState(false);
-  const [currentSegment, setCurrentSegment] = useState(0);
-  const [totalSegments] = useState(5); // We have 5 video segments
   const sectionRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -24,26 +22,6 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
     setIsIOS(/(iPhone|iPad|iPod|iOS)/i.test(navigator.userAgent));
   }, []);
 
-  // Get current video source based on segment
-  const getCurrentVideoSrc = () => {
-    if (isIOS) {
-      return `/segment_${currentSegment.toString().padStart(3, '0')}.mp4`;
-    } else {
-      // Desktop: use WebM for first segment, MP4 for others
-      return currentSegment === 0 ? '/afterdark1.webm' : `/segment_${currentSegment.toString().padStart(3, '0')}.mp4`;
-    }
-  };
-
-  // Handle video end - load next segment
-  const handleVideoEnded = () => {
-    if (currentSegment < totalSegments - 1) {
-      setCurrentSegment(prev => prev + 1);
-      setIsPlaying(true); // Continue playing next segment
-    } else {
-      setIsPlaying(false); // All segments finished
-    }
-  };
-
   // iOS video loading handler
   useEffect(() => {
     if (videoRef.current) {
@@ -51,35 +29,23 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
       
       const handleLoadedData = () => {
         setVideoLoaded(true);
-        console.log(`Video segment ${currentSegment} loaded`);
+        console.log('Video loaded successfully');
       };
       
       const handleError = (e: any) => {
-        console.log(`Video segment ${currentSegment} error:`, e);
+        console.log('Video error:', e);
         setVideoLoaded(false);
       };
       
       video.addEventListener('loadeddata', handleLoadedData);
       video.addEventListener('error', handleError);
-      video.addEventListener('ended', handleVideoEnded);
-      
-      // Reload video when segment changes
-      video.load();
       
       return () => {
         video.removeEventListener('loadeddata', handleLoadedData);
         video.removeEventListener('error', handleError);
-        video.removeEventListener('ended', handleVideoEnded);
       };
     }
-  }, [currentSegment]);
-
-  // Auto-play next segment when it loads
-  useEffect(() => {
-    if (videoRef.current && isPlaying && videoLoaded && currentSegment > 0) {
-      videoRef.current.play().catch(console.log);
-    }
-  }, [videoLoaded, currentSegment, isPlaying]);
+  }, []);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -251,7 +217,7 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
               onCanPlay={() => console.log('iOS Video can play')}
               onLoadedData={() => setVideoLoaded(true)}
               onError={(e) => console.log('iOS Video error:', e)}
-              src={getCurrentVideoSrc()}
+              src="/video/afterdark1.mp4"
             >
               Your browser does not support the video tag.
             </video>
@@ -273,7 +239,7 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
               onCanPlay={() => console.log('Video can play')}
               onLoadedData={() => setVideoLoaded(true)}
               onError={(e) => console.log('Video error:', e)}
-              src={getCurrentVideoSrc()}
+              src="/video/afterdark1.mp4"
             >
               Your browser does not support the video tag.
             </video>
@@ -297,19 +263,6 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
             </div>
           )}
           
-          {/* Progress indicator - show which segment is playing */}
-          {isPlaying && (
-            <div className="absolute top-4 left-4 z-10 flex space-x-1">
-              {Array.from({ length: totalSegments }, (_, i) => (
-                <div
-                  key={i}
-                  className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                    i <= currentSegment ? 'bg-white/90' : 'bg-white/30'
-                  }`}
-                />
-              ))}
-            </div>
-          )}
 
           {/* Mute/unmute button - only visible when playing and not on iOS */}
           {isPlaying && !isIOS && (
