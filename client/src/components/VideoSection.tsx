@@ -100,19 +100,29 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
     };
   }, [isFocused]);
 
-  const handlePlayClick = async () => {
-    if (!videoRef.current) return;
+  const handlePlayClick = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!videoRef.current) {
+      console.log('No video ref');
+      return;
+    }
     
     try {
-      console.log('Play video clicked');
+      console.log('Play video clicked - current playing state:', isPlaying);
       
       if (isPlaying) {
         videoRef.current.pause();
         setIsPlaying(false);
+        console.log('Video paused');
       } else {
+        console.log('Starting video play...');
+        
         // Simple play for all devices
         if (isIOS) {
           videoRef.current.controls = true; // Show native controls on iOS after first play
+          console.log('iOS controls enabled');
         }
         
         await videoRef.current.play();
@@ -202,7 +212,10 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
           
           {/* Custom play overlay - shows on all devices until video starts */}
           {!isPlaying && (
-            <div className="absolute inset-0 bg-black/20 flex items-center justify-center group-hover:bg-black/30 transition-all duration-300 pointer-events-none">
+            <div 
+              className="absolute inset-0 bg-black/20 flex items-center justify-center group-hover:bg-black/30 transition-all duration-300 cursor-pointer"
+              onClick={handlePlayClick}
+            >
               <div className="text-center">
                 {/* Large play button */}
                 <div className="w-20 h-20 md:w-24 md:h-24 mx-auto mb-4 border-2 border-white/80 rounded-full flex items-center justify-center group-hover:border-white group-hover:scale-110 transition-all duration-300 backdrop-blur-sm bg-black/30">
