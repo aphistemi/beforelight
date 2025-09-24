@@ -75,34 +75,29 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
             isVisible ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0'
           }`}
         >
-          {/* Video placeholder with abstract pattern */}
-          <div className="absolute inset-0 bg-gradient-to-br from-muted/20 to-background flex items-center justify-center">
-            <div className="text-center">
-              <div className="w-24 h-24 mx-auto mb-4 border border-muted-foreground/30 rounded-full flex items-center justify-center">
-                <div className="w-0 h-0 border-l-8 border-l-foreground border-t-4 border-t-transparent border-b-4 border-b-transparent ml-1" />
-              </div>
-              <p className="text-muted-foreground text-sm tracking-widest">VIDEO PIECE</p>
-            </div>
-          </div>
-          
-          {/* Mock video overlay */}
+          {/* Actual video */}
           <video
             ref={videoRef}
-            className="w-full h-full object-cover opacity-0"
+            className="w-full h-full object-cover"
+            loop
+            muted
+            playsInline
             poster=""
-          />
+          >
+            <source src="/attached_assets/afterdark1_1758731166481.webm" type="video/webm" />
+            Your browser does not support the video tag.
+          </video>
           
-          {/* Play button overlay */}
+          {/* Play/pause overlay */}
           <button
             onClick={handlePlayClick}
-            className="absolute inset-0 group hover-elevate transition-all duration-300"
+            className="absolute inset-0 group hover-elevate transition-all duration-300 bg-black/0 hover:bg-black/10"
             data-testid="button-video-play"
           >
-            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
             {!isPlaying && (
               <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                <div className="w-16 h-16 border-2 border-white/80 rounded-full flex items-center justify-center group-hover:border-white group-hover:scale-110 transition-all duration-300">
-                  <div className="w-0 h-0 border-l-6 border-l-white/80 border-t-4 border-t-transparent border-b-4 border-b-transparent ml-1 group-hover:border-l-white" />
+                <div className="w-20 h-20 border-2 border-white/60 rounded-full flex items-center justify-center group-hover:border-white/90 group-hover:scale-110 transition-all duration-300 backdrop-blur-sm bg-black/20">
+                  <div className="w-0 h-0 border-l-8 border-l-white/80 border-t-6 border-t-transparent border-b-6 border-b-transparent ml-1 group-hover:border-l-white" />
                 </div>
               </div>
             )}
