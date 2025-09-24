@@ -10,7 +10,7 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
   const [isVisible, setIsVisible] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
-  const [isMuted, setIsMuted] = useState(true);
+  const [isMuted, setIsMuted] = useState(false);
   const sectionRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -50,11 +50,7 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
       if (shouldFocus !== isFocused) {
         setIsFocused(shouldFocus);
         
-        // Auto-play when focused (but keep muted)
-        if (shouldFocus && videoRef.current?.paused) {
-          videoRef.current.play();
-          setIsPlaying(true);
-        }
+        // Don't auto-play, just focus the video section
       }
     };
     
@@ -147,40 +143,53 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
             loop
             muted={isMuted}
             playsInline
-            autoPlay
             poster=""
           >
             <source src="/afterdark1.webm" type="video/webm" />
             Your browser does not support the video tag.
           </video>
           
-          {/* Mute/unmute button - always visible */}
-          <button
-            onClick={handleMuteClick}
-            className="absolute top-4 right-4 z-10 w-12 h-12 bg-black/40 hover:bg-black/60 backdrop-blur-sm rounded-full flex items-center justify-center group hover-elevate transition-all duration-300"
-            data-testid="button-video-sound"
-            aria-label={isMuted ? "Unmute video" : "Mute video"}
-          >
-            {isMuted ? (
-              <VolumeX className="w-5 h-5 text-white/80 group-hover:text-white" />
-            ) : (
-              <Volume2 className="w-5 h-5 text-white/80 group-hover:text-white" />
-            )}
-          </button>
-
-          {/* Play/pause overlay */}
-          <button
-            onClick={handlePlayClick}
-            className="absolute inset-0 group hover-elevate transition-all duration-300 bg-black/0 hover:bg-black/10"
-            data-testid="button-video-play"
-          >
-            {!isPlaying && (
-              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                <div className="w-20 h-20 border-2 border-white/60 rounded-full flex items-center justify-center group-hover:border-white/90 group-hover:scale-110 transition-all duration-300 backdrop-blur-sm bg-black/20">
-                  <div className="w-0 h-0 border-l-8 border-l-white/80 border-t-6 border-t-transparent border-b-6 border-b-transparent ml-1 group-hover:border-l-white" />
+          {/* Custom video preview/thumbnail */}
+          {!isPlaying && (
+            <div className="absolute inset-0 bg-gradient-to-br from-black/60 via-black/40 to-black/80 flex items-center justify-center">
+              <div className="text-center">
+                {/* Large play button */}
+                <div className="w-24 h-24 md:w-32 md:h-32 mx-auto mb-6 border-2 border-white/70 rounded-full flex items-center justify-center group-hover:border-white group-hover:scale-110 transition-all duration-300 backdrop-blur-sm bg-black/20">
+                  <div className="w-0 h-0 border-l-[12px] md:border-l-[16px] border-l-white/80 border-t-[8px] md:border-t-[10px] border-t-transparent border-b-[8px] md:border-b-[10px] border-b-transparent ml-2" />
+                </div>
+                
+                {/* Play text */}
+                <div className="text-white/90">
+                  <div className="text-lg md:text-xl font-light tracking-[0.3em] mb-2">PLAY VIDEO</div>
+                  <div className="text-sm text-white/60 font-light tracking-wide">Experience in motion</div>
                 </div>
               </div>
-            )}
+            </div>
+          )}
+          
+          {/* Mute/unmute button - only visible when playing */}
+          {isPlaying && (
+            <button
+              onClick={handleMuteClick}
+              className="absolute top-4 right-4 z-10 w-12 h-12 bg-black/40 hover:bg-black/60 backdrop-blur-sm rounded-full flex items-center justify-center group hover-elevate transition-all duration-300"
+              data-testid="button-video-sound"
+              aria-label={isMuted ? "Unmute video" : "Mute video"}
+            >
+              {isMuted ? (
+                <VolumeX className="w-5 h-5 text-white/80 group-hover:text-white" />
+              ) : (
+                <Volume2 className="w-5 h-5 text-white/80 group-hover:text-white" />
+              )}
+            </button>
+          )}
+
+          {/* Play/pause overlay - covers entire video */}
+          <button
+            onClick={handlePlayClick}
+            className="absolute inset-0 group hover-elevate transition-all duration-300 bg-black/0 hover:bg-black/5"
+            data-testid="button-video-play"
+          >
+            {/* This button is invisible but covers the whole video for easy clicking */}
           </button>
         </div>
       </div>
