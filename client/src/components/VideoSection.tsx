@@ -198,52 +198,26 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
               : 'rounded-sm z-10'
           }`}
         >
-          {/* Actual video */}
-          {isIOS ? (
-            // iOS-specific video element with native controls always visible
-            <video
-              ref={videoRef}
-              className="w-full h-full object-cover"
-              loop
-              muted={false}
-              playsInline
-              preload="metadata"
-              controls={true}
-              webkit-playsinline="true"
-              onPlay={() => setIsPlaying(true)}
-              onPause={() => setIsPlaying(false)}
-              onLoadStart={() => console.log('iOS Video loading...')}
-              onCanPlay={() => console.log('iOS Video can play')}
-              onLoadedData={() => setVideoLoaded(true)}
-              onError={(e) => console.log('iOS Video error:', e)}
-              src="/afterdark1.mp4"
-            >
-              Your browser does not support the video tag.
-            </video>
-          ) : (
-            // Desktop/other browsers
-            <video
-              ref={videoRef}
-              className="w-full h-full object-cover"
-              loop
-              muted={isMuted}
-              playsInline
-              preload="metadata"
-              webkit-playsinline="true"
-              controls={false}
-              onPlay={() => setIsPlaying(true)}
-              onPause={() => setIsPlaying(false)}
-              onLoadStart={() => console.log('Video loading...')}
-              onCanPlay={() => console.log('Video can play')}
-              onLoadedData={() => setVideoLoaded(true)}
-              onError={(e) => console.log('Video error:', e)}
-              src="/afterdark1.mp4"
-            >
-              Your browser does not support the video tag.
-            </video>
-          )}
+          {/* Video with custom controls */}
+          <video
+            ref={videoRef}
+            className="w-full h-full object-cover"
+            controls={isIOS ? true : false}
+            muted={!isIOS}
+            playsInline
+            onPlay={() => setIsPlaying(true)}
+            onPause={() => setIsPlaying(false)}
+            onLoadStart={() => console.log('Video loading...')}
+            onLoadedData={() => setVideoLoaded(true)}
+            onError={(e) => console.log('Video error:', e)}
+            onLoadedMetadata={() => console.log('Video metadata loaded!')}
+          >
+            <source src="/afterdark1.mp4" type="video/mp4" />
+            <source src="/afterdark1.webm" type="video/webm" />
+            Your browser does not support the video tag.
+          </video>
           
-          {/* Subtle play overlay over thumbnail - hidden on iOS since we use native controls */}
+          {/* Custom play overlay - only on desktop */}
           {!isPlaying && !isIOS && (
             <div className="absolute inset-0 bg-black/20 flex items-center justify-center group-hover:bg-black/30 transition-all duration-300 pointer-events-none">
               <div className="text-center">
