@@ -161,7 +161,7 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
                 {/* Play text */}
                 <div className="text-white/95">
                   <div className="text-base md:text-lg font-light tracking-[0.3em] mb-1">PLAY</div>
-                  <div className="text-xs text-white/70 font-light tracking-wide">Experience in motion</div>
+                  <div className="text-xs text-white/70 font-light tracking-wide">As the hours pass</div>
                 </div>
               </div>
             </div>
