@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Volume2, VolumeX } from 'lucide-react';
+import Plyr from 'plyr-react';
+import 'plyr/dist/plyr.css';
 
 interface VideoSectionProps {
   title?: string;
@@ -173,47 +175,26 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
               : 'rounded-sm z-10'
           }`}
         >
-          {/* Video element */}
-          <video
-            ref={videoRef}
-            className="w-full h-full object-cover"
-            poster="/video-thumbnail.png"
-            preload="metadata"
-            playsInline
-            onPlay={() => {
-              console.log('Video started playing!');
-              setIsPlaying(true);
+          {/* Plyr Video Player - Reliable cross-platform */}
+          <Plyr
+            source={{
+              type: 'video',
+              sources: [
+                {
+                  src: '/video/afterdark1_small.mp4',
+                  type: 'video/mp4',
+                },
+              ],
+              poster: '/video-thumbnail.png',
             }}
-            onPause={() => {
-              console.log('Video paused!');
-              setIsPlaying(false);
+            options={{
+              controls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'fullscreen'],
+              hideControls: false,
+              clickToPlay: true,
+              keyboard: { focused: true, global: false },
+              tooltips: { controls: false, seek: true },
             }}
-          >
-            <source src="/video/afterdark1_small.mp4" type="video/mp4" />
-            Your browser does not support the video tag.
-          </video>
-          
-          {/* Pre-play overlay - ONLY shows before first play */}
-          {!isPlaying && (
-            <div className="absolute inset-0 bg-black/20 flex items-center justify-center pointer-events-none">
-              <button
-                onClick={handlePlayClick}
-                className="pointer-events-auto text-center hover:scale-105 transition-transform"
-                data-testid="button-video-play"
-              >
-                {/* Large play button */}
-                <div className="w-20 h-20 md:w-24 md:h-24 mx-auto mb-4 border-2 border-white/80 rounded-full flex items-center justify-center hover:border-white transition-all duration-300 backdrop-blur-sm bg-black/30">
-                  <div className="w-0 h-0 border-l-[10px] md:border-l-[12px] border-l-white/90 border-t-[7px] md:border-t-[8px] border-t-transparent border-b-[7px] md:border-b-[8px] border-b-transparent ml-1" />
-                </div>
-                
-                {/* Play text */}
-                <div className="text-white/95">
-                  <div className="text-base md:text-lg font-light tracking-[0.3em] mb-1">PLAY</div>
-                  <div className="text-xs text-white/70 font-light tracking-wide">As the hours pass</div>
-                </div>
-              </button>
-            </div>
-          )}
+          />
           
 
           {/* Mute/unmute button - only visible when playing on desktop */}
