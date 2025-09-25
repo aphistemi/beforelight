@@ -1,9 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 
-// Declare Fluid Player types
-declare global {
-  function fluidPlayer(selector: string, options: any): any;
-}
 
 interface VideoSectionProps {
   title?: string;
@@ -16,66 +12,17 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
   const sectionRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const fluidPlayerInstance = useRef<any>(null);
 
-  // Initialize Fluid Player
+  // Disabled Fluid Player - using basic HTML5 video instead
   useEffect(() => {
-    const initFluidPlayer = () => {
-      if (videoRef.current && typeof fluidPlayer !== 'undefined') {
-        // iOS detection for HLS handling
-        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-        
-        // If serving HLS (.m3u8): don't initialize hls.js on iOS
-        // iOS has native HLS support, so hls.js is not needed
-        if (!isIOS && typeof window !== 'undefined' && (window as any).Hls && (window as any).Hls.isSupported()) {
-          // set up hls.js ONLY for non-iOS browsers
-          // (Currently using MP4, but this is ready for HLS if needed)
-        }
-
-        // Initialize Fluid Player with iOS-friendly safe configuration
-        fluidPlayerInstance.current = fluidPlayer('arcadia-video', {
-          layoutControls: {
-            fillToContainer: true,
-            autoPlay: false,   // set true only if mute:true
-            mute: false,
-            captionsEnabled: false
-          }
-        });
-
-        // Listen to events
-        fluidPlayerInstance.current.on('play', () => {
-          console.log('Fluid Player started');
-        });
-
-        // Ensure a real user gesture starts playback on iOS
-        const v = document.getElementById('arcadia-video') as HTMLVideoElement;
-        if (v) {
-          ['touchend','click'].forEach(ev =>
-            v.addEventListener(ev, () => v.play().catch(()=>{}), { once:true })
-          );
-        }
-      }
-    };
-
-    // Wait for Fluid Player script to load
-    if (typeof fluidPlayer === 'undefined') {
-      const checkFluidPlayer = setInterval(() => {
-        if (typeof fluidPlayer !== 'undefined') {
-          clearInterval(checkFluidPlayer);
-          initFluidPlayer();
-        }
-      }, 100);
-      
-      return () => clearInterval(checkFluidPlayer);
-    } else {
-      initFluidPlayer();
+    // Basic HTML5 video setup for iOS compatibility
+    const video = videoRef.current;
+    if (video) {
+      // Ensure a real user gesture starts playback on iOS
+      ['touchend', 'click'].forEach(ev =>
+        video.addEventListener(ev, () => video.play().catch(() => {}), { once: true })
+      );
     }
-
-    return () => {
-      if (fluidPlayerInstance.current && fluidPlayerInstance.current.destroy) {
-        fluidPlayerInstance.current.destroy();
-      }
-    };
   }, []);
 
   useEffect(() => {
@@ -150,7 +97,7 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
               : 'rounded-sm z-10'
           }`}
         >
-          {/* Fluid Player Video */}
+          {/* Basic HTML5 Video for Testing */}
           <video
             ref={videoRef}
             id="arcadia-video"
