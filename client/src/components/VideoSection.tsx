@@ -29,11 +29,9 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
       
       const handleLoadedData = () => {
         setVideoLoaded(true);
-        console.log('Video loaded successfully');
       };
       
       const handleError = (e: any) => {
-        console.log('Video error:', e);
         setVideoLoaded(false);
       };
       
@@ -101,30 +99,19 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
   }, [isFocused]);
 
   const handlePlayClick = async () => {
-    if (!videoRef.current) {
-      console.error('Video ref is null');
-      return;
-    }
+    if (!videoRef.current) return;
     
     try {
-      console.log('Custom play button clicked');
-      console.log('Video ready state:', videoRef.current.readyState);
-      console.log('Video paused:', videoRef.current.paused);
-      console.log('Video current time:', videoRef.current.currentTime);
-      
-      // Enable native controls and play
-      videoRef.current.controls = true;
-      const playPromise = videoRef.current.play();
-      
-      if (playPromise !== undefined) {
-        await playPromise;
-        console.log('Video started successfully');
-      } else {
-        console.log('Video play() returned undefined');
+      // On mobile, ensure video is properly configured
+      if (isIOS) {
+        videoRef.current.controls = true;
+        videoRef.current.playsInline = true;
       }
       
+      // Play the video
+      await videoRef.current.play();
     } catch (error) {
-      console.error('Error starting video:', error);
+      // Silently handle play errors - mobile browsers are strict about user interaction
     }
   };
 
@@ -188,32 +175,15 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
           <video
             ref={videoRef}
             controls
+            playsInline
+            preload="metadata"
             width="100%"
             height="100%"
             poster="/video-thumbnail.png"
             data-testid="video-player"
-            onLoadStart={() => console.log('🎥 Video: Load started')}
-            onLoadedData={() => console.log('🎥 Video: Data loaded')}
-            onCanPlay={() => console.log('🎥 Video: Can play')}
-            onPlay={() => {
-              console.log('🎥 Video: Playing');
-              setIsPlaying(true);
-            }}
-            onPause={() => {
-              console.log('🎥 Video: Paused');
-              setIsPlaying(false);
-            }}
-            onEnded={() => {
-              console.log('🎥 Video: Ended');
-              setIsPlaying(false);
-            }}
-            onError={(e) => {
-              console.error('🎥 Video Error:', e);
-              console.error('🎥 Video Error Details:', (e.target as HTMLVideoElement)?.error);
-            }}
-            onStalled={() => console.log('🎥 Video: Stalled')}
-            onSuspend={() => console.log('🎥 Video: Suspended')}
-            onWaiting={() => console.log('🎥 Video: Waiting')}
+            onPlay={() => setIsPlaying(true)}
+            onPause={() => setIsPlaying(false)}
+            onEnded={() => setIsPlaying(false)}
           >
             <source src="/afterdark1_web.mp4" type="video/mp4" />
             Your browser does not support the video tag.
@@ -241,11 +211,13 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
             </button>
           )}
 
-          {/* Play/pause overlay - only shows when paused (hidden on iOS to avoid conflicts with native controls) */}
-          {!isIOS && !isPlaying && (
+          {/* Play/pause overlay - shows on all devices when paused, but with different behavior */}
+          {!isPlaying && (
             <button
               onClick={handlePlayClick}
-              className="absolute inset-0 z-20 transition-all duration-300 bg-transparent hover:bg-black/5 cursor-pointer"
+              className={`absolute inset-0 transition-all duration-300 ${
+                isIOS ? 'z-0 bg-transparent' : 'z-20 bg-transparent hover:bg-black/5'
+              } cursor-pointer`}
               data-testid="button-video-play"
               aria-label="Play video"
               style={{ minHeight: '100%', minWidth: '100%' }}
