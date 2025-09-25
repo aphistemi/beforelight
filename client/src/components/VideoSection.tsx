@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Volume2, VolumeX } from 'lucide-react';
+import { Volume2, VolumeX, Play } from 'lucide-react';
 
 interface VideoSectionProps {
   title?: string;
@@ -211,19 +211,28 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
             </button>
           )}
 
-          {/* Play/pause overlay - shows on all devices when paused, but with different behavior */}
+          {/* Play button overlay - visible when paused */}
+          {!isPlaying && (
+            <div className="absolute inset-0 flex items-center justify-center z-30">
+              <button
+                onClick={handlePlayClick}
+                className="w-20 h-20 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full flex items-center justify-center group hover-elevate transition-all duration-300 border-2 border-white/30"
+                data-testid="button-video-play"
+                aria-label="Play video"
+              >
+                <Play className="w-8 h-8 text-white ml-1 group-hover:scale-110 transition-transform" fill="currentColor" />
+              </button>
+            </div>
+          )}
+          
+          {/* Full video clickable area - invisible overlay for easy clicking */}
           {!isPlaying && (
             <button
               onClick={handlePlayClick}
-              className={`absolute inset-0 transition-all duration-300 ${
-                isIOS ? 'z-0 bg-transparent' : 'z-20 bg-transparent hover:bg-black/5'
-              } cursor-pointer`}
-              data-testid="button-video-play"
+              className="absolute inset-0 z-20 bg-transparent cursor-pointer"
+              data-testid="button-video-play-area"
               aria-label="Play video"
-              style={{ minHeight: '100%', minWidth: '100%' }}
-            >
-              {/* This button covers the whole video for easy clicking */}
-            </button>
+            />
           )}
         </div>
       </div>
