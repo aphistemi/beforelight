@@ -101,17 +101,28 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
   }, [isFocused]);
 
   const handlePlayClick = async () => {
-    if (!videoRef.current) return;
+    if (!videoRef.current) {
+      console.error('Video ref is null');
+      return;
+    }
     
     try {
       console.log('Custom play button clicked');
+      console.log('Video ready state:', videoRef.current.readyState);
+      console.log('Video paused:', videoRef.current.paused);
+      console.log('Video current time:', videoRef.current.currentTime);
       
       // Enable native controls and play
       videoRef.current.controls = true;
-      await videoRef.current.play();
+      const playPromise = videoRef.current.play();
       
-      // State will be set by onPlay event
-      console.log('Video started successfully');
+      if (playPromise !== undefined) {
+        await playPromise;
+        console.log('Video started successfully');
+      } else {
+        console.log('Video play() returned undefined');
+      }
+      
     } catch (error) {
       console.error('Error starting video:', error);
     }
@@ -204,7 +215,7 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
             onSuspend={() => console.log('🎥 Video: Suspended')}
             onWaiting={() => console.log('🎥 Video: Waiting')}
           >
-            <source src="/afterdark1_2min.mp4" type="video/mp4" />
+            <source src="/afterdark1_web.mp4" type="video/mp4" />
             Your browser does not support the video tag.
           </video>
           
