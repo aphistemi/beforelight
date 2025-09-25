@@ -22,27 +22,13 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
   useEffect(() => {
     const initFluidPlayer = () => {
       if (videoRef.current && typeof fluidPlayer !== 'undefined') {
-        // Initialize Fluid Player with dark theme configuration
+        // Initialize Fluid Player with iOS-friendly safe configuration
         fluidPlayerInstance.current = fluidPlayer('arcadia-video', {
           layoutControls: {
             fillToContainer: true,
-            primaryColor: '#ffffff',
-            autoPlay: false,
+            autoPlay: false,   // set true only if mute:true
             mute: false,
-            playPauseAnimation: true,
-            captionsEnabled: false,
-            controlBar: {
-              autoHide: true,
-              autoHideTimeout: 3
-            },
-            playButtonShowing: true,
-            allowTheatre: false,
-            allowFullscreen: true,
-            logo: {
-              imageUrl: null,
-              position: 'top-left',
-              clickUrl: null
-            }
+            captionsEnabled: true
           }
         });
 
@@ -50,6 +36,14 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
         fluidPlayerInstance.current.on('play', () => {
           console.log('Fluid Player started');
         });
+
+        // Ensure a real user gesture starts playback on iOS
+        const v = document.getElementById('arcadia-video') as HTMLVideoElement;
+        if (v) {
+          ['touchend','click'].forEach(ev =>
+            v.addEventListener(ev, () => v.play().catch(()=>{}), { once:true })
+          );
+        }
       }
     };
 
@@ -179,8 +173,9 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
           <video
             ref={videoRef}
             id="arcadia-video"
-            controls
             playsInline
+            webkit-playsinline="true"
+            controls
             preload="metadata"
             width="100%"
             height="100%"
