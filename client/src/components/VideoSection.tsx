@@ -1,5 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
-import { Volume2, VolumeX, Play } from 'lucide-react';
+
+// Declare Fluid Player types
+declare global {
+  function fluidPlayer(selector: string, options: any): any;
+}
 
 interface VideoSectionProps {
   title?: string;
@@ -8,41 +12,66 @@ interface VideoSectionProps {
 
 export default function VideoSection({ title, description }: VideoSectionProps) {
   const [isVisible, setIsVisible] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
-  const [isIOS, setIsIOS] = useState(false);
-  const [videoLoaded, setVideoLoaded] = useState(false);
   const sectionRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const fluidPlayerInstance = useRef<any>(null);
 
-  // Detect iOS
+  // Initialize Fluid Player
   useEffect(() => {
-    setIsIOS(/(iPhone|iPad|iPod|iOS)/i.test(navigator.userAgent));
-  }, []);
+    const initFluidPlayer = () => {
+      if (videoRef.current && typeof fluidPlayer !== 'undefined') {
+        // Initialize Fluid Player with dark theme configuration
+        fluidPlayerInstance.current = fluidPlayer('arcadia-video', {
+          layoutControls: {
+            fillToContainer: true,
+            primaryColor: '#ffffff',
+            autoPlay: false,
+            mute: false,
+            playPauseAnimation: true,
+            captionsEnabled: false,
+            controlBar: {
+              autoHide: true,
+              autoHideTimeout: 3
+            },
+            playButtonShowing: true,
+            allowTheatre: false,
+            allowFullscreen: true,
+            logo: {
+              imageUrl: null,
+              position: 'top-left',
+              clickUrl: null
+            }
+          }
+        });
 
-  // iOS video loading handler
-  useEffect(() => {
-    if (videoRef.current) {
-      const video = videoRef.current;
+        // Listen to events
+        fluidPlayerInstance.current.on('play', () => {
+          console.log('Fluid Player started');
+        });
+      }
+    };
+
+    // Wait for Fluid Player script to load
+    if (typeof fluidPlayer === 'undefined') {
+      const checkFluidPlayer = setInterval(() => {
+        if (typeof fluidPlayer !== 'undefined') {
+          clearInterval(checkFluidPlayer);
+          initFluidPlayer();
+        }
+      }, 100);
       
-      const handleLoadedData = () => {
-        setVideoLoaded(true);
-      };
-      
-      const handleError = (e: any) => {
-        setVideoLoaded(false);
-      };
-      
-      video.addEventListener('loadeddata', handleLoadedData);
-      video.addEventListener('error', handleError);
-      
-      return () => {
-        video.removeEventListener('loadeddata', handleLoadedData);
-        video.removeEventListener('error', handleError);
-      };
+      return () => clearInterval(checkFluidPlayer);
+    } else {
+      initFluidPlayer();
     }
+
+    return () => {
+      if (fluidPlayerInstance.current && fluidPlayerInstance.current.destroy) {
+        fluidPlayerInstance.current.destroy();
+      }
+    };
   }, []);
 
   useEffect(() => {
@@ -98,31 +127,6 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
     };
   }, [isFocused]);
 
-  const handlePlayClick = async () => {
-    if (!videoRef.current) return;
-    
-    try {
-      // On mobile, ensure video is properly configured
-      if (isIOS) {
-        videoRef.current.controls = true;
-        videoRef.current.playsInline = true;
-      }
-      
-      // Play the video
-      await videoRef.current.play();
-    } catch (error) {
-      // Silently handle play errors - mobile browsers are strict about user interaction
-    }
-  };
-
-  const handleMuteClick = () => {
-    if (videoRef.current) {
-      const newMutedState = !isMuted;
-      videoRef.current.muted = newMutedState;
-      setIsMuted(newMutedState);
-    }
-  };
-
   return (
     <section 
       ref={sectionRef}
@@ -171,9 +175,10 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
               : 'rounded-sm z-10'
           }`}
         >
-          {/* Direct static video file - basic test with debugging */}
+          {/* Fluid Player Video */}
           <video
             ref={videoRef}
+            id="arcadia-video"
             controls
             playsInline
             preload="metadata"
@@ -181,9 +186,7 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
             height="100%"
             poster="/video-thumbnail.png"
             data-testid="video-player"
-            onPlay={() => setIsPlaying(true)}
-            onPause={() => setIsPlaying(false)}
-            onEnded={() => setIsPlaying(false)}
+            style={{ width: '100%', height: '100%' }}
           >
             <source src="/afterdark1.mp4" type="video/mp4" />
             <source src="/afterdark1.webm" type="video/webm" />
@@ -191,50 +194,9 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
           </video>
           
           {/* Video title overlay */}
-          <div className="absolute bottom-8 left-8 text-white">
+          <div className="absolute bottom-8 left-8 text-white z-50 pointer-events-none">
             <h3 className="text-lg font-light tracking-wide">As the hours pass</h3>
           </div>
-          
-
-          {/* Mute/unmute button - only visible when playing on desktop */}
-          {isPlaying && !isIOS && (
-            <button
-              onClick={handleMuteClick}
-              className="absolute top-4 right-4 z-10 w-12 h-12 bg-black/40 hover:bg-black/60 backdrop-blur-sm rounded-full flex items-center justify-center group hover-elevate transition-all duration-300"
-              data-testid="button-video-sound"
-              aria-label={isMuted ? "Unmute video" : "Mute video"}
-            >
-              {isMuted ? (
-                <VolumeX className="w-5 h-5 text-white/80 group-hover:text-white" />
-              ) : (
-                <Volume2 className="w-5 h-5 text-white/80 group-hover:text-white" />
-              )}
-            </button>
-          )}
-
-          {/* Play button overlay - visible when paused */}
-          {!isPlaying && (
-            <div className="absolute inset-0 flex items-center justify-center z-30">
-              <button
-                onClick={handlePlayClick}
-                className="w-20 h-20 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full flex items-center justify-center group hover-elevate transition-all duration-300 border-2 border-white/30"
-                data-testid="button-video-play"
-                aria-label="Play video"
-              >
-                <Play className="w-8 h-8 text-white ml-1 group-hover:scale-110 transition-transform" fill="currentColor" />
-              </button>
-            </div>
-          )}
-          
-          {/* Full video clickable area - invisible overlay for easy clicking */}
-          {!isPlaying && (
-            <button
-              onClick={handlePlayClick}
-              className="absolute inset-0 z-20 bg-transparent cursor-pointer"
-              data-testid="button-video-play-area"
-              aria-label="Play video"
-            />
-          )}
         </div>
       </div>
     </section>
