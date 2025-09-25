@@ -189,7 +189,6 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
             style={{ width: '100%', height: '100%' }}
           >
             <source src="/afterdark1.mp4" type="video/mp4" />
-            <source src="/afterdark1.webm" type="video/webm" />
             Your browser does not support the video tag.
           </video>
           
