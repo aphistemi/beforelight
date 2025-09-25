@@ -100,41 +100,20 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
     };
   }, [isFocused]);
 
-  const handlePlayClick = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    if (!videoRef.current) {
-      console.log('No video ref');
-      return;
-    }
+  const handlePlayClick = async () => {
+    if (!videoRef.current) return;
     
     try {
-      console.log('Play video clicked - current playing state:', isPlaying);
+      console.log('Custom play button clicked');
       
-      if (isPlaying) {
-        videoRef.current.pause();
-        setIsPlaying(false);
-        console.log('Video paused');
-      } else {
-        console.log('Starting video play...');
-        console.log('Video readyState before play:', videoRef.current.readyState);
-        console.log('Video duration before play:', videoRef.current.duration);
-        console.log('Video current src:', videoRef.current.currentSrc);
-        
-        // Simple play for all devices
-        if (isIOS) {
-          videoRef.current.controls = true; // Show native controls on iOS after first play
-          console.log('iOS controls enabled');
-        }
-        
-        const playResult = await videoRef.current.play();
-        console.log('Play promise result:', playResult);
-        setIsPlaying(true);
-        console.log('Video playing successfully');
-      }
+      // Enable native controls and play
+      videoRef.current.controls = true;
+      await videoRef.current.play();
+      
+      // State will be set by onPlay event
+      console.log('Video started successfully');
     } catch (error) {
-      console.error('Error playing video:', error);
+      console.error('Error starting video:', error);
     }
   };
 
@@ -194,12 +173,11 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
               : 'rounded-sm z-10'
           }`}
         >
-          {/* Simple video element for testing */}
+          {/* Video element */}
           <video
             ref={videoRef}
             className="w-full h-full object-cover"
             poster="/video-thumbnail.png"
-            controls
             preload="metadata"
             playsInline
             onPlay={() => {
@@ -215,15 +193,16 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
             Your browser does not support the video tag.
           </video>
           
-          {/* Temporarily hidden overlay for testing */}
-          {false && !isPlaying && (
-            <div 
-              className="absolute inset-0 bg-black/20 flex items-center justify-center group-hover:bg-black/30 transition-all duration-300 cursor-pointer"
-              onClick={handlePlayClick}
-            >
-              <div className="text-center">
+          {/* Pre-play overlay - ONLY shows before first play */}
+          {!isPlaying && (
+            <div className="absolute inset-0 bg-black/20 flex items-center justify-center pointer-events-none">
+              <button
+                onClick={handlePlayClick}
+                className="pointer-events-auto text-center hover:scale-105 transition-transform"
+                data-testid="button-video-play"
+              >
                 {/* Large play button */}
-                <div className="w-20 h-20 md:w-24 md:h-24 mx-auto mb-4 border-2 border-white/80 rounded-full flex items-center justify-center group-hover:border-white group-hover:scale-110 transition-all duration-300 backdrop-blur-sm bg-black/30">
+                <div className="w-20 h-20 md:w-24 md:h-24 mx-auto mb-4 border-2 border-white/80 rounded-full flex items-center justify-center hover:border-white transition-all duration-300 backdrop-blur-sm bg-black/30">
                   <div className="w-0 h-0 border-l-[10px] md:border-l-[12px] border-l-white/90 border-t-[7px] md:border-t-[8px] border-t-transparent border-b-[7px] md:border-b-[8px] border-b-transparent ml-1" />
                 </div>
                 
@@ -232,7 +211,7 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
                   <div className="text-base md:text-lg font-light tracking-[0.3em] mb-1">PLAY</div>
                   <div className="text-xs text-white/70 font-light tracking-wide">As the hours pass</div>
                 </div>
-              </div>
+              </button>
             </div>
           )}
           
