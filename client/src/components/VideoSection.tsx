@@ -194,13 +194,13 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
               : 'rounded-sm z-10'
           }`}
         >
-          {/* Video with thumbnail and streaming */}
+          {/* Simple video element for testing */}
           <video
             ref={videoRef}
             className="w-full h-full object-cover"
             poster="/video-thumbnail.png"
+            controls
             preload="metadata"
-            muted
             playsInline
             onPlay={() => {
               console.log('Video started playing!');
@@ -210,37 +210,13 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
               console.log('Video paused!');
               setIsPlaying(false);
             }}
-            onLoadStart={() => console.log('Video loading...')}
-            onLoadedData={() => {
-              console.log('Video data loaded!');
-              setVideoLoaded(true);
-            }}
-            onError={(e) => {
-              console.log('Video error:', e);
-              const video = e.target as HTMLVideoElement;
-              console.log('Video error details:', video?.error);
-            }}
-            onLoadedMetadata={(e) => {
-              console.log('Video metadata loaded!');
-              const video = e.target as HTMLVideoElement;
-              console.log('Video duration:', video?.duration);
-              console.log('Video readyState:', video?.readyState);
-            }}
-            onCanPlay={() => console.log('Video can play!')}
-            onCanPlayThrough={() => console.log('Video can play through!')}
-            onTimeUpdate={() => {
-              if (videoRef.current) {
-                console.log('Video time:', videoRef.current.currentTime);
-              }
-            }}
           >
             <source src="/video/afterdark1_small.mp4" type="video/mp4" />
-            <source src="/video/afterdark1.mp4" type="video/mp4" />
             Your browser does not support the video tag.
           </video>
           
-          {/* Custom play overlay - shows on all devices until video starts */}
-          {!isPlaying && (
+          {/* Temporarily hidden overlay for testing */}
+          {false && !isPlaying && (
             <div 
               className="absolute inset-0 bg-black/20 flex items-center justify-center group-hover:bg-black/30 transition-all duration-300 cursor-pointer"
               onClick={handlePlayClick}
