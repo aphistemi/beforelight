@@ -22,6 +22,16 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
   useEffect(() => {
     const initFluidPlayer = () => {
       if (videoRef.current && typeof fluidPlayer !== 'undefined') {
+        // iOS detection for HLS handling
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+        
+        // If serving HLS (.m3u8): don't initialize hls.js on iOS
+        // iOS has native HLS support, so hls.js is not needed
+        if (!isIOS && typeof window !== 'undefined' && (window as any).Hls && (window as any).Hls.isSupported()) {
+          // set up hls.js ONLY for non-iOS browsers
+          // (Currently using MP4, but this is ready for HLS if needed)
+        }
+
         // Initialize Fluid Player with iOS-friendly safe configuration
         fluidPlayerInstance.current = fluidPlayer('arcadia-video', {
           layoutControls: {
