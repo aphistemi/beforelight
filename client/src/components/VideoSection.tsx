@@ -98,9 +98,9 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
     };
   }, [isFocused]);
 
-  const handlePlayClick = async () => {
-    if (!videoRef.current) return;
-    
+    https://beforelight.cc/afterdark1.mp4
+  https://beforelight.cc/afterdark1.mp4
+  
     try {
       // On mobile, ensure video is properly configured
       if (isIOS) {
@@ -185,7 +185,8 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
             onPause={() => setIsPlaying(false)}
             onEnded={() => setIsPlaying(false)}
           >
-            <source src="/afterdark1_web.mp4" type="video/mp4" />
+                <source src="/afterdark1.mp4" type="video/mp4" />
+                <source src="/afterdark1.webm" type="video/webm" />/>pe="video/mp4" />
             Your browser does not support the video tag.
           </video>
           
