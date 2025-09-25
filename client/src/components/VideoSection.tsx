@@ -173,19 +173,37 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
               : 'rounded-sm z-10'
           }`}
         >
-          {/* Simple HTML5 video that works everywhere */}
+          {/* Direct static video file - basic test with debugging */}
           <video
-            className="w-full h-full object-cover"
-            poster="/video-thumbnail.png"
             controls
-            preload="none"
-            playsInline
+            width="100%"
+            height="100%"
+            poster="/video-thumbnail.png"
             data-testid="video-player"
+            onLoadStart={() => console.log('🎥 Video: Load started')}
+            onLoadedMetadata={() => console.log('🎥 Video: Metadata loaded')}
+            onLoadedData={() => console.log('🎥 Video: Data loaded')}
+            onCanPlay={() => console.log('🎥 Video: Can play')}
+            onCanPlayThrough={() => console.log('🎥 Video: Can play through')}
+            onPlay={() => console.log('🎥 Video: Playing')}
+            onError={(e) => {
+              console.error('🎥 Video Error:', e);
+              console.error('🎥 Video Error Details:', (e.target as HTMLVideoElement)?.error);
+            }}
+            onAbort={() => console.log('🎥 Video: Aborted')}
+            onEmptied={() => console.log('🎥 Video: Emptied')}
+            onStalled={() => console.log('🎥 Video: Stalled')}
+            onSuspend={() => console.log('🎥 Video: Suspended')}
+            onWaiting={() => console.log('🎥 Video: Waiting')}
           >
-            <source src="/video/afterdark1_small.mp4" type="video/mp4" />
-            <source src="/video/afterdark1.mp4" type="video/mp4" />
+            <source src="/working_video.mp4" type="video/mp4" />
             Your browser does not support the video tag.
           </video>
+          
+          {/* Debug info */}
+          <div className="absolute top-2 left-2 bg-black/80 text-white text-xs p-2 rounded">
+            Video test: working_video.mp4 (TESTING)
+          </div>
           
 
           {/* Mute/unmute button - only visible when playing on desktop */}
