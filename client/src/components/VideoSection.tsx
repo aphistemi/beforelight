@@ -181,11 +181,30 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
             height="100%"
             poster="/video-thumbnail.png"
             data-testid="video-player"
-            onPlay={() => setIsPlaying(true)}
-            onPause={() => setIsPlaying(false)}
-            onEnded={() => setIsPlaying(false)}
+            onLoadStart={() => console.log('🎥 Video: Load started')}
+            onLoadedData={() => console.log('🎥 Video: Data loaded')}
+            onCanPlay={() => console.log('🎥 Video: Can play')}
+            onPlay={() => {
+              console.log('🎥 Video: Playing');
+              setIsPlaying(true);
+            }}
+            onPause={() => {
+              console.log('🎥 Video: Paused');
+              setIsPlaying(false);
+            }}
+            onEnded={() => {
+              console.log('🎥 Video: Ended');
+              setIsPlaying(false);
+            }}
+            onError={(e) => {
+              console.error('🎥 Video Error:', e);
+              console.error('🎥 Video Error Details:', (e.target as HTMLVideoElement)?.error);
+            }}
+            onStalled={() => console.log('🎥 Video: Stalled')}
+            onSuspend={() => console.log('🎥 Video: Suspended')}
+            onWaiting={() => console.log('🎥 Video: Waiting')}
           >
-            <source src="/afterdark1_web.mp4" type="video/mp4" />
+            <source src="/afterdark1_2min.mp4" type="video/mp4" />
             Your browser does not support the video tag.
           </video>
           
