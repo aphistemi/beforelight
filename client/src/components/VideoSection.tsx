@@ -175,34 +175,23 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
         >
           {/* Direct static video file - basic test with debugging */}
           <video
+            ref={videoRef}
             controls
             width="100%"
             height="100%"
             poster="/video-thumbnail.png"
             data-testid="video-player"
-            onLoadStart={() => console.log('🎥 Video: Load started')}
-            onLoadedMetadata={() => console.log('🎥 Video: Metadata loaded')}
-            onLoadedData={() => console.log('🎥 Video: Data loaded')}
-            onCanPlay={() => console.log('🎥 Video: Can play')}
-            onCanPlayThrough={() => console.log('🎥 Video: Can play through')}
-            onPlay={() => console.log('🎥 Video: Playing')}
-            onError={(e) => {
-              console.error('🎥 Video Error:', e);
-              console.error('🎥 Video Error Details:', (e.target as HTMLVideoElement)?.error);
-            }}
-            onAbort={() => console.log('🎥 Video: Aborted')}
-            onEmptied={() => console.log('🎥 Video: Emptied')}
-            onStalled={() => console.log('🎥 Video: Stalled')}
-            onSuspend={() => console.log('🎥 Video: Suspended')}
-            onWaiting={() => console.log('🎥 Video: Waiting')}
+            onPlay={() => setIsPlaying(true)}
+            onPause={() => setIsPlaying(false)}
+            onEnded={() => setIsPlaying(false)}
           >
             <source src="/working_video.mp4" type="video/mp4" />
             Your browser does not support the video tag.
           </video>
           
-          {/* Debug info */}
-          <div className="absolute top-2 left-2 bg-black/80 text-white text-xs p-2 rounded">
-            Video test: working_video.mp4 (TESTING)
+          {/* Video title overlay */}
+          <div className="absolute bottom-8 left-8 text-white">
+            <h3 className="text-lg font-light tracking-wide">As the hours pass</h3>
           </div>
           
 
@@ -222,8 +211,8 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
             </button>
           )}
 
-          {/* Play/pause overlay - covers entire video (hidden on iOS to avoid conflicts with native controls) */}
-          {!isIOS && (
+          {/* Play/pause overlay - only shows when paused (hidden on iOS to avoid conflicts with native controls) */}
+          {!isIOS && !isPlaying && (
             <button
               onClick={handlePlayClick}
               className="absolute inset-0 z-20 transition-all duration-300 bg-transparent hover:bg-black/5 cursor-pointer"
