@@ -185,7 +185,7 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
             onPause={() => setIsPlaying(false)}
             onEnded={() => setIsPlaying(false)}
           >
-            <source src="/working_video.mp4" type="video/mp4" />
+            <source src="/afterdark1_web.mp4" type="video/mp4" />
             Your browser does not support the video tag.
           </video>
           
