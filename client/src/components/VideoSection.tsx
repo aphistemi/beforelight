@@ -38,7 +38,7 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
             fillToContainer: true,
             autoPlay: false,   // set true only if mute:true
             mute: false,
-            captionsEnabled: true
+            captionsEnabled: false
           }
         });
 
@@ -138,36 +138,7 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
       data-testid="section-video"
     >
       <div className="max-w-6xl w-full">
-        {title && (
-          <div 
-            className={`text-center mb-16 transition-all duration-1000 ${
-              isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
-            }`}
-          >
-            <h2 
-              className="text-4xl md:text-6xl font-light tracking-widest text-foreground mb-8 font-[Inter]"
-              data-testid="text-video-title"
-            >
-              {title}
-            </h2>
-            {description && (
-              <p 
-                className="text-lg text-muted-foreground font-light tracking-wide font-[Inter] max-w-2xl mx-auto"
-                data-testid="text-video-description"
-              >
-                {description}
-              </p>
-            )}
-          </div>
-        )}
         
-        {/* Focus overlay - dims the page when video is focused (disabled on iOS for compatibility) */}
-        {isFocused && !/(iPhone|iPad|iPod|iOS)/i.test(navigator.userAgent) && (
-          <div 
-            className="fixed inset-0 z-50 bg-black/70 transition-opacity duration-500"
-            data-testid="overlay-video-focus"
-          />
-        )}
         
         <div 
           ref={containerRef}
@@ -193,14 +164,10 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
             data-testid="video-player"
             style={{ width: '100%', height: '100%' }}
           >
-            <source src="/afterdark1.mp4" type="video/mp4" />
+            <source src="/afterdark1e1.mp4" type="video/mp4" />
             Your browser does not support the video tag.
           </video>
           
-          {/* Video title overlay */}
-          <div className="absolute bottom-8 left-8 text-white z-50 pointer-events-none">
-            <h3 className="text-lg font-light tracking-wide">As the hours pass</h3>
-          </div>
         </div>
       </div>
     </section>
