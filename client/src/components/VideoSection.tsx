@@ -1,7 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import { Volume2, VolumeX } from 'lucide-react';
-import Plyr from 'plyr-react';
-import 'plyr/dist/plyr.css';
 
 interface VideoSectionProps {
   title?: string;
@@ -175,26 +173,19 @@ export default function VideoSection({ title, description }: VideoSectionProps) 
               : 'rounded-sm z-10'
           }`}
         >
-          {/* Plyr Video Player - Reliable cross-platform */}
-          <Plyr
-            source={{
-              type: 'video',
-              sources: [
-                {
-                  src: '/video/afterdark1_small.mp4',
-                  type: 'video/mp4',
-                },
-              ],
-              poster: '/video-thumbnail.png',
-            }}
-            options={{
-              controls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'fullscreen'],
-              hideControls: false,
-              clickToPlay: true,
-              keyboard: { focused: true, global: false },
-              tooltips: { controls: false, seek: true },
-            }}
-          />
+          {/* Simple HTML5 video that works everywhere */}
+          <video
+            className="w-full h-full object-cover"
+            poster="/video-thumbnail.png"
+            controls
+            preload="none"
+            playsInline
+            data-testid="video-player"
+          >
+            <source src="/video/afterdark1_small.mp4" type="video/mp4" />
+            <source src="/video/afterdark1.mp4" type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
           
 
           {/* Mute/unmute button - only visible when playing on desktop */}
