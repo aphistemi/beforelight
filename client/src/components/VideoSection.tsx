@@ -234,7 +234,6 @@ export default function VideoSection({
               onError={(e) => console.log("iOS Video error:", e)}
             >
               <source src="/afterdark1.mp4" type="video/mp4" />
-              <source src="/afterdark1.webm" type="video/webm" />
               Your browser does not support the video tag.
             </video>
           ) : (
@@ -256,7 +255,6 @@ export default function VideoSection({
               onLoadedData={() => setVideoLoaded(true)}
               onError={(e) => console.log("Video error:", e)}
             >
-              <source src="afterdark1.webm" type="video/webm" />
               <source src="afterdark1.mp4" type="video/mp4" />
               Your browser does not support the video tag.
             </video>
