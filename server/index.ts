@@ -6,30 +6,6 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// Add proper headers for video files
-app.use((req, res, next) => {
-  // Check if request is for a video file
-  if (req.path.match(/\.(mp4|webm|m3u8)$/i)) {
-    // Set proper video headers
-    res.set({
-      'Accept-Ranges': 'bytes',
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, HEAD, OPTIONS',
-      'Access-Control-Allow-Headers': 'Range'
-    });
-    
-    // Set proper Content-Type based on file extension
-    if (req.path.endsWith('.mp4')) {
-      res.set('Content-Type', 'video/mp4');
-    } else if (req.path.endsWith('.webm')) {
-      res.set('Content-Type', 'video/webm');
-    } else if (req.path.endsWith('.m3u8')) {
-      res.set('Content-Type', 'application/vnd.apple.mpegurl');
-    }
-  }
-  next();
-});
-
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
