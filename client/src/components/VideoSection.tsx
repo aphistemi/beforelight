@@ -43,9 +43,6 @@ export default function VideoSection({
       video.addEventListener("loadeddata", handleLoadedData);
       video.addEventListener("error", handleError);
 
-      // Force load for iOS
-      video.load();
-
       return () => {
         video.removeEventListener("loadeddata", handleLoadedData);
         video.removeEventListener("error", handleError);
