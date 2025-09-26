@@ -223,7 +223,7 @@ export default function VideoSection({
               ref={videoRef}
               className="w-full h-full object-cover"
               loop
-              muted={false}
+              muted={true}
               playsInline
               poster="/video-thumbnail.png"
               preload="metadata"
