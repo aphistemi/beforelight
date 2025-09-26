@@ -73,7 +73,7 @@ export default function VideoSection({
             onPause={() => setIsPlaying(false)}
             onError={(e) => console.error("Video error:", e)}
           >
-            <source src="/afterdark1.mp4" type="video/mp4" />
+            <source src="afterdark1.mp4" type="video/mp4" />
             Your browser does not support the video tag.
           </video>
 
