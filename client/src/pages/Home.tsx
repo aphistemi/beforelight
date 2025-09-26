@@ -57,7 +57,6 @@ export default function Home() {
     };
   }, []);
 
-  return <VideoSection />;
   return (
     <div
       className="min-h-screen"
