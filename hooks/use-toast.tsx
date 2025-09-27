@@ -1,47 +1,40 @@
-// hooks/use-toast.tsx
-import * as React from "react"
+"use client";
+
+import { createContext, useContext, useState, ReactNode } from "react";
 
 export type Toast = {
-  id?: string
-  title?: string
-  description?: string
-  action?: React.ReactNode
-  // allow any extra props your UI may spread onto <Toast ...props />
-  [key: string]: any
-}
+  id?: string;
+  title?: string;
+  description?: string;
+  action?: ReactNode;
+  // allow extra props that your <Toast {...props} /> might spread
+  [key: string]: any;
+};
 
 type Ctx = {
-  toasts: Toast[]
-  toast: (t: Toast | string) => void
-}
+  toasts: Toast[];
+  toast: (t: Toast | string) => void;
+};
 
-const ToastContext = React.createContext<Ctx>({
-  toasts: [],
-  toast: () => {},
-})
+const ToastContext = createContext<Ctx>({ toasts: [], toast: () => {} });
 
-export function ToastProvider({ children }: { children: React.ReactNode }) {
-  const [toasts, setToasts] = React.useState<Toast[]>([])
+export function ToastProvider({ children }: { children: ReactNode }) {
+  const [toasts, setToasts] = useState<Toast[]>([]);
 
   const toast = (t: Toast | string) => {
-    const obj: Toast = typeof t === "string" ? { title: t } : t
-    setToasts((prev) => [
-      ...prev,
-      { id: Date.now().toString(), ...obj },
-    ])
-    if (typeof window !== "undefined") {
-      // dev aid; replace with your real toaster UI as needed
-      console.log("[toast]", obj)
-    }
-  }
+    const obj: Toast = typeof t === "string" ? { title: t } : t;
+    setToasts((prev) => [...prev, { id: Date.now().toString(), ...obj }]);
+    // dev aid; swap for a real UI if you want
+    if (typeof window !== "undefined") console.log("[toast]", obj);
+  };
 
   return (
     <ToastContext.Provider value={{ toasts, toast }}>
       {children}
     </ToastContext.Provider>
-  )
+  );
 }
 
 export function useToast() {
-  return React.useContext(ToastContext)
+  return useContext(ToastContext);
 }
