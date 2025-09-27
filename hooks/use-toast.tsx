@@ -1,10 +1,13 @@
-// hooks/use-toast.ts
+// hooks/use-toast.tsx
 import * as React from "react"
 
 export type Toast = {
   id?: string
   title?: string
   description?: string
+  action?: React.ReactNode
+  // allow any extra props your UI may spread onto <Toast ...props />
+  [key: string]: any
 }
 
 type Ctx = {
@@ -21,11 +24,13 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = React.useState<Toast[]>([])
 
   const toast = (t: Toast | string) => {
-    const obj: Toast =
-      typeof t === "string" ? { title: t } : t
-    setToasts((prev) => [...prev, { id: Date.now().toString(), ...obj }])
-    // no-op: you can replace with a real UI later
+    const obj: Toast = typeof t === "string" ? { title: t } : t
+    setToasts((prev) => [
+      ...prev,
+      { id: Date.now().toString(), ...obj },
+    ])
     if (typeof window !== "undefined") {
+      // dev aid; replace with your real toaster UI as needed
       console.log("[toast]", obj)
     }
   }
