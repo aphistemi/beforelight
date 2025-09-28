@@ -52,13 +52,13 @@ export function VideoSection({
   };
 
   return (
-    <section 
+    <section
       className="min-h-screen py-24 px-8 flex items-center justify-center"
       data-testid="section-video"
     >
       <div className="max-w-6xl w-full text-center">
         {title && (
-          <h2 
+          <h2
             className="text-4xl md:text-6xl font-light mb-6"
             data-testid="text-video-title"
           >
@@ -66,7 +66,7 @@ export function VideoSection({
           </h2>
         )}
         {description && (
-          <p 
+          <p
             className="text-lg text-muted-foreground mb-8"
             data-testid="text-video-description"
           >
@@ -88,8 +88,7 @@ export function VideoSection({
             onPause={() => setIsPlaying(false)}
             onError={(e) => console.error("Video error:", e)}
           >
-            <source src="/afterdark1.mp4" type="video/mp4" />
-            <source src="/afterdark1.webm" type="video/webm" />
+            <source src={"https://4jonbnyt0iufuysl.public.blob.vercel-storage.com/afterdark1.mp4"} type="video/mp4" />
             Your browser does not support the video tag.
           </video>
 

@@ -3,8 +3,8 @@ import "./globals.css";
 import Providers from "./providers";
 
 export const metadata: Metadata = {
-  title: "Next.js App",
-  description: "A modern Next.js application",
+  title: "In Arcadia",
+  description: "Dark Exhibition",
 };
 
 export default function RootLayout({
