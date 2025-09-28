@@ -1,12 +1,22 @@
-import { VideoSection } from '@/components/VideoSection'
+'use client';
 
-export default function Home() {
+import { Switch, Route } from "wouter";
+import Home from "@/components/pages/Home";
+// import NotFound from "@/pages/not-found";
+
+function Router() {
   return (
-    <main>
-      <VideoSection 
-        title="Welcome to Next.js"
-        description="Your Express/Vite app has been successfully converted to Next.js with App Router"
-      />
-    </main>
-  )
+    <Switch>
+      <Route path="/" component={Home} />
+      {/* <Route component={NotFound} /> */}
+    </Switch>
+  );
 }
+
+function App() {
+  return (
+    <Home />
+  );
+}
+
+export default App;
