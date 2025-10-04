@@ -4,24 +4,23 @@ import ScrollIndicator from "@/components/ScrollIndicator";
 import StickyImageSection from "@/components/StickyImageSection";
 import { Link } from "wouter";
 
-// Fullscreen video section — same vibe as homepage video area
+// 🎬 Fullscreen video section (refined to match homepage behavior)
 function FullscreenVideo({ src, poster }: { src: string; poster?: string }) {
   return (
     <section
-      className="relative"
+      className="relative flex items-center justify-center py-16"
       style={{
         background:
           "linear-gradient(to bottom, rgba(0,0,0,0.95) 0%, rgb(0,0,0) 100%)",
       }}
     >
-      <div className="relative aspect-[16/9] w-full">
+      <div className="relative w-full max-w-6xl aspect-[16/9] overflow-hidden rounded-xl border border-white/10 shadow-xl">
         <video
-          className="h-full w-full object-cover"
+          className="w-full h-full object-cover"
           playsInline
-          autoPlay
           muted
           loop
-          controls={false}
+          controls
           preload="metadata"
           poster={poster}
           src={src}
@@ -32,7 +31,7 @@ function FullscreenVideo({ src, poster }: { src: string; poster?: string }) {
 }
 
 export default function VerseTwo() {
-  // Your confirmed sources
+  // ✅ Your confirmed sources
   const IMG_1 = "/verse2-1.png";
   const IMG_2 = "/verse2-2.png";
   const IMG_3 = "/guts.jpeg";
@@ -69,7 +68,7 @@ export default function VerseTwo() {
         totalSections={totalSticky}
       />
 
-      {/* Text break (optional) */}
+      {/* Text break */}
       <div
         className="relative h-screen flex items-center justify-center"
         style={{
@@ -91,7 +90,7 @@ export default function VerseTwo() {
         </div>
       </div>
 
-      {/* Video 1 */}
+      {/* 🎥 Video 1 */}
       <FullscreenVideo src={VID_1} />
 
       {/* Sticky Image 3 */}
@@ -101,10 +100,10 @@ export default function VerseTwo() {
         totalSections={totalSticky}
       />
 
-      {/* Video 2 */}
+      {/* 🎥 Video 2 */}
       <FullscreenVideo src={VID_2} />
 
-      {/* Back home button */}
+      {/* ⬅️ Back home button */}
       <div className="w-full text-center py-10">
         <Link href="/">
           <button className="border border-white/30 text-white px-6 py-3 rounded-full text-sm tracking-wide hover:border-white hover:bg-white/10 transition-all duration-300">
@@ -113,7 +112,6 @@ export default function VerseTwo() {
         </Link>
       </div>
 
-      {/* Footer spacer */}
       <div className="h-32 bg-black" />
     </div>
   );
