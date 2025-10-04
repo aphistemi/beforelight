@@ -1,8 +1,6 @@
-import dynamic from "next/dynamic";
-
-// Reuse the same client-only router for any unmatched path
-const RootApp = dynamic(() => import("@/components/RootApp"), { ssr: false });
+import ClientRoot from "../ClientRoot";
 
 export default function CatchAll() {
-  return <RootApp />;
+  // Any unmatched path renders the same SPA router
+  return <ClientRoot />;
 }
