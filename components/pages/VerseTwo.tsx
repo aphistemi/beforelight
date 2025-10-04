@@ -12,7 +12,7 @@ type MediaItem =
  */
 function StickyImageStory({
   items,
-  vhPerSlide = 130, // tweak dwell time here (bigger = slower)
+  vhPerSlide = 130, // bigger = longer dwell time per slide
 }: {
   items: MediaItem[];
   vhPerSlide?: number;
@@ -56,13 +56,70 @@ function StickyImageStory({
       <div className="sticky top-0 h-[100svh] w-full overflow-hidden bg-black">
         <div className="relative h-full w-full">
           {items.map((item, i) => {
-            // Overlap fades so frames crossfade smoothly
+            // Crossfade overlap around each slide
             const fadeInStart = i - 0.2;
             const fadeOutEnd = i + 0.85;
             const local = (progress - fadeInStart) / (fadeOutEnd - fadeInStart);
             let opacity = smooth(local);
-            // Ensure first slide is visible immediately
             if (i === 0 && opacity < 0.6) opacity = 1;
 
             return (
               <div
+                key={i}
+                className="absolute inset-0 transition-opacity duration-200"
+                style={{ opacity }}
+              >
+                {item.type === "image" ? (
+                  <img
+                    src={item.src}
+                    alt={item.alt ?? ""}
+                    className="h-full w-full object-cover"
+                    loading={i === 0 ? "eager" : "lazy"}
+                    decoding="async"
+                    onError={(e) => {
+                      (e.currentTarget.parentElement as HTMLElement).style.background =
+                        "linear-gradient(180deg,#111,#000)";
+                      e.currentTarget.style.display = "none";
+                    }}
+                  />
+                ) : (
+                  <video
+                    className="h-full w-full object-cover"
+                    playsInline
+                    autoPlay
+                    muted
+                    loop
+                    preload="metadata"
+                    src={item.src}
+                    onError={(e) => {
+                      (e.currentTarget.parentElement as HTMLElement).style.background =
+                        "linear-gradient(180deg,#111,#000)";
+                    }}
+                  />
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+export default function VerseTwo() {
+  // Confirmed sources (images at repo root /public; videos are blob URLs)
+  const items: MediaItem[] = [
+    { type: "image", src: "/verse2-1.png", alt: "Verse Two 1" },
+    { type: "image", src: "/verse2-2.png", alt: "Verse Two 2" },
+    { type: "video", src: "https://4jonbnyt0iufuysl.public.blob.vercel-storage.com/1005.mp4" },
+    { type: "image", src: "/guts.jpeg", alt: "Guts" },
+    { type: "video", src: "https://4jonbnyt0iufuysl.public.blob.vercel-storage.com/0929.mp4" },
+  ];
+
+  return (
+    <main className="bg-black text-white overflow-x-hidden">
+      <StickyImageStory items={items} vhPerSlide={130} />
+      <ScrollIndicator />
+    </main>
+  );
+}
