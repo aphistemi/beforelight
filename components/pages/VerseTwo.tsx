@@ -3,14 +3,19 @@
 import { useEffect, useRef, useState } from "react";
 import ScrollIndicator from "@/components/ScrollIndicator";
 
+// Define a strict union for items
+type MediaItem =
+  | { type: "image"; src: string; alt?: string }
+  | { type: "video"; src: string };
+
 /**
- * Crossfading sticky image story.
+ * Crossfading sticky image/video story.
  */
 function StickyImageStory({
   items,
   vhPerSlide = 120,
 }: {
-  items: { type: "image" | "video"; src: string; alt?: string }[];
+  items: MediaItem[];
   vhPerSlide?: number;
 }) {
   const wrapRef = useRef<HTMLDivElement | null>(null);
@@ -95,19 +100,14 @@ function StickyImageStory({
 }
 
 export default function VerseTwo() {
+  // Your exact order and URLs:
   const items = [
     { type: "image", src: "/media/verse2-1.png", alt: "Verse Two 1" },
     { type: "image", src: "/media/verse2-2.png", alt: "Verse Two 2" },
-    {
-      type: "video",
-      src: "https://4jonbnyt0iufuysl.public.blob.vercel-storage.com/1005.mp4",
-    },
+    { type: "video", src: "https://4jonbnyt0iufuysl.public.blob.vercel-storage.com/1005.mp4" },
     { type: "image", src: "/media/guts.jpeg", alt: "Guts" },
-    {
-      type: "video",
-      src: "https://4jonbnyt0iufuysl.public.blob.vercel-storage.com/0929.mp4",
-    },
-  ];
+    { type: "video", src: "https://4jonbnyt0iufuysl.public.blob.vercel-storage.com/0929.mp4" },
+  ] satisfies MediaItem[];
 
   return (
     <main className="bg-black text-white overflow-x-hidden">
