@@ -1,20 +1,16 @@
-'use client';
+"use client";
 
 import { Switch, Route } from "wouter";
 import Home from "@/components/pages/Home";
 import VerseTwo from "@/components/pages/VerseTwo";
 
-/**
- * This component handles all your SPA routes.
- * Wouter decides what to render based on the current path.
- */
-export default function App() {
+export default function RootApp() {
   return (
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/verse-two" component={VerseTwo} />
-      {/* Optional: add a fallback route */}
-      {/* <Route><Home /></Route> */}
+      {/* optional: a default/fallback route */}
+      {/* <Route> <Home /> </Route> */}
     </Switch>
   );
 }
