@@ -1,20 +1,15 @@
-'use client';
+import type { Metadata } from "next";
+import dynamic from "next/dynamic";
 
-import { Switch, Route } from "wouter";
-import Home from "@/components/pages/Home";
-import VerseTwo from "@/components/pages/VerseTwo";
+// Prevent static prerendering, but more importantly we avoid importing the router on the server.
+export const metadata: Metadata = {
+  title: "Before Light",
+  description: "Before Light",
+};
 
-/**
- * This component handles all your SPA routes.
- * Wouter decides what to render based on the current path.
- */
-export default function App() {
-  return (
-    <Switch>
-      <Route path="/" component={Home} />
-      <Route path="/verse-two" component={VerseTwo} />
-      {/* Optional: add a fallback route */}
-      {/* <Route><Home /></Route> */}
-    </Switch>
-  );
+// 👇 Load the SPA router only in the browser (no SSR = no 'location' on server)
+const RootApp = dynamic(() => import("@/components/RootApp"), { ssr: false });
+
+export default function Page() {
+  return <RootApp />;
 }

@@ -9,8 +9,9 @@ export default function RootApp() {
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/verse-two" component={VerseTwo} />
-      {/* optional: a default/fallback route */}
-      {/* <Route> <Home /> </Route> */}
+      {/* Optional fallback:
+      <Route><Home /></Route>
+      */}
     </Switch>
   );
 }
