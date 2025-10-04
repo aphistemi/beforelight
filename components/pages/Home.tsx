@@ -4,17 +4,56 @@ import { useEffect, useState } from 'react';
 import StickyImageSection from '@/components/StickyImageSection';
 import { VideoSection } from '../VideoSection';
 import ScrollIndicator from '@/components/ScrollIndicator';
-import { Link } from 'wouter'; // ✅ add this
+import { Link } from 'wouter';
 
-// Import user's images (if used elsewhere)
+// (kept) Imports you had — fine to leave even if unused elsewhere
 import handsImage from '@assets/ChatGPT Image Sep 24, 2025, 05_29_45 PM_1758729617680.png';
 import coatImage from '@assets/ChatGPT Image Sep 24, 2025, 06_48_49 PM_1758729617679.png';
 
 export default function Home() {
   const [globalScrollProgress, setGlobalScrollProgress] = useState(0);
 
+  // ✅ Make homepage videos: no autoplay, show controls, sound ON at Play
   useEffect(() => {
-    // Smooth scrolling with resistance
+    const root = document.getElementById('home-video-wrapper');
+    if (!root) return;
+
+    const vids = Array.from(root.querySelectorAll<HTMLVideoElement>('video'));
+    for (const v of vids) {
+      try {
+        // stop any autoplaying behavior
+        v.autoplay = false;
+        v.pause();
+
+        // show controls & allow sound
+        v.controls = true;
+        v.muted = false;
+
+        // if the browser force-muted it, unmute on user interaction
+        const handlePlay = () => {
+          if (v.muted) v.muted = false;
+        };
+        v.addEventListener('play', handlePlay);
+
+        // cleanup
+        const cleanup = () => v.removeEventListener('play', handlePlay);
+        // store cleanup on element so we can call later if needed
+        (v as any).__cleanupPlay = cleanup;
+      } catch {}
+    }
+
+    return () => {
+      for (const v of vids) {
+        try {
+          const cleanup = (v as any).__cleanupPlay as (() => void) | undefined;
+          cleanup?.();
+        } catch {}
+      }
+    };
+  }, []);
+
+  // (kept) your scroll smoothing/resistance
+  useEffect(() => {
     document.documentElement.style.scrollBehavior = 'auto';
 
     const handleScroll = () => {
@@ -24,25 +63,14 @@ export default function Home() {
       setGlobalScrollProgress(progress);
     };
 
-    // Add scroll resistance
     let scrollTimeout: NodeJS.Timeout;
     const handleScrollWithResistance = (e: WheelEvent) => {
       clearTimeout(scrollTimeout);
-
-      // Add slight resistance to scrolling
       const resistance = 0.7;
       const dampedDelta = e.deltaY * resistance;
-
-      window.scrollBy({
-        top: dampedDelta,
-        behavior: 'auto',
-      });
-
+      window.scrollBy({ top: dampedDelta, behavior: 'auto' });
       e.preventDefault();
-
-      scrollTimeout = setTimeout(() => {
-        handleScroll();
-      }, 16);
+      scrollTimeout = setTimeout(() => handleScroll(), 16);
     };
 
     window.addEventListener('wheel', handleScrollWithResistance, { passive: false });
@@ -69,10 +97,10 @@ export default function Home() {
     >
       <ScrollIndicator />
 
-      {/* First Sticky Section */}
+      {/* Sticky Image 1 */}
       <StickyImageSection imageSrc={'/hands_image.png'} sectionIndex={0} totalSections={3} />
 
-      {/* Second Sticky Section */}
+      {/* Sticky Image 2 */}
       <StickyImageSection imageSrc={'/back_image.png'} sectionIndex={1} totalSections={3} />
 
       {/* Text Section */}
@@ -81,47 +109,3 @@ export default function Home() {
         style={{
           background: `linear-gradient(to bottom, 
             rgba(0,0,0,0.8) 0%, 
-            rgba(0,0,0,0.95) 100%)`,
-        }}
-      >
-        <div className="text-center max-w-2xl px-4 sm:px-8">
-          <div
-            className="text-2xl sm:text-3xl md:text-5xl font-light tracking-wide text-white/90 leading-relaxed font-[Inter]"
-            style={{
-              textShadow: '0 2px 20px rgba(0,0,0,0.8)',
-            }}
-          >
-            <div className="sm:whitespace-nowrap">We're swaying to drum beats</div>
-            <div>
-              <em className="text-white/70">In motion, I'm feeling..</em>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Video Section */}
-      <div
-        className="relative"
-        style={{
-          background: 'linear-gradient(to bottom, rgba(0,0,0,0.95) 0%, rgb(0,0,0) 100%)',
-        }}
-      >
-        <VideoSection />
-
-        {/* ✅ "Second verse →" button under video */}
-        <div className="w-full text-center py-10">
-          <Link href="/verse-two">
-            <button
-              className="border border-white/30 text-white px-6 py-3 rounded-full text-sm tracking-wide hover:border-white hover:bg-white/10 transition-all duration-300"
-            >
-              Second verse →
-            </button>
-          </Link>
-        </div>
-      </div>
-
-      {/* Final dark section */}
-      <div className="h-32 bg-black" />
-    </div>
-  );
-}
