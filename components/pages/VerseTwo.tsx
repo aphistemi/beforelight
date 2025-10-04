@@ -33,12 +33,15 @@ function FullscreenVideo({
         <video
           className={vertical ? "w-full h-auto object-contain" : "w-full h-full object-cover"}
           playsInline
-          muted
-          loop
           controls
           preload="metadata"
           poster={poster}
           src={src}
+          muted={false} // ✅ start unmuted
+          onPlay={(e) => {
+            // in case browser forces mute, unmute on user interaction
+            if (e.currentTarget.muted) e.currentTarget.muted = false;
+          }}
         />
       </div>
     </section>
@@ -46,12 +49,14 @@ function FullscreenVideo({
 }
 
 export default function VerseTwo() {
-  // ✅ Your confirmed sources
+  // ✅ Confirmed image + video sources
   const IMG_1 = "/verse2-1.png";
   const IMG_2 = "/verse2-2.png";
   const IMG_3 = "/guts.jpeg";
-  const VID_1 = "https://4jonbnyt0iufuysl.public.blob.vercel-storage.com/1005.mp4"; // portrait
-  const VID_2 = "https://4jonbnyt0iufuysl.public.blob.vercel-storage.com/0929.mp4"; // landscape
+  const VID_1 =
+    "https://4jonbnyt0iufuysl.public.blob.vercel-storage.com/1005.mp4"; // portrait
+  const VID_2 =
+    "https://4jonbnyt0iufuysl.public.blob.vercel-storage.com/0929.mp4"; // landscape
 
   const totalSticky = 3;
 
@@ -68,12 +73,20 @@ export default function VerseTwo() {
       <ScrollIndicator />
 
       {/* Sticky Image 1 */}
-      <StickyImageSection imageSrc={IMG_1} sectionIndex={0} totalSections={totalSticky} />
+      <StickyImageSection
+        imageSrc={IMG_1}
+        sectionIndex={0}
+        totalSections={totalSticky}
+      />
 
       {/* Sticky Image 2 */}
-      <StickyImageSection imageSrc={IMG_2} sectionIndex={1} totalSections={totalSticky} />
+      <StickyImageSection
+        imageSrc={IMG_2}
+        sectionIndex={1}
+        totalSections={totalSticky}
+      />
 
-      {/* Text break (optional) */}
+      {/* Text break */}
       <div
         className="relative h-screen flex items-center justify-center"
         style={{
@@ -99,7 +112,11 @@ export default function VerseTwo() {
       <FullscreenVideo src={VID_1} vertical />
 
       {/* Sticky Image 3 */}
-      <StickyImageSection imageSrc={IMG_3} sectionIndex={2} totalSections={totalSticky} />
+      <StickyImageSection
+        imageSrc={IMG_3}
+        sectionIndex={2}
+        totalSections={totalSticky}
+      />
 
       {/* 🎥 Video 2 — landscape */}
       <FullscreenVideo src={VID_2} />
