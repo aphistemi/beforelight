@@ -2,7 +2,7 @@
 
 import { Switch, Route } from "wouter";
 import Home from "@/components/pages/Home";
-import VerseTwo from "@/components/pages/VerseTwo";
+import VerseTwo from "@/components/pages/VerseTwo"; // <-- default import
 
 export default function RootApp() {
   return (
