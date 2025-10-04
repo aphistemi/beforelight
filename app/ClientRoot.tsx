@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 
-// Load the SPA router only in the browser
+// Load your SPA router only in the browser (avoids 'location' on server)
 const RootApp = dynamic(() => import("@/components/RootApp"), { ssr: false });
 
 export default function ClientRoot() {

@@ -7,6 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  // Server component that mounts the client-only SPA
   return <ClientRoot />;
 }
