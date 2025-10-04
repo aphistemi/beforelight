@@ -1,110 +1,125 @@
-// app/verse-two/page.tsx
-import type { Metadata } from "next";
-import Image from "next/image";
-import Link from "next/link";
-
-export const metadata: Metadata = {
+export const metadata = {
   title: "Before Light — Verse Two",
-  description: "A sibling page to the front experience: a few pictures and a video at the end.",
-  openGraph: {
-    title: "Before Light — Verse Two",
-    description: "A sibling page to the front experience: a few pictures and a video at the end.",
-    url: "https://beforelight.cc/verse-two",
-    siteName: "Before Light",
-    type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Before Light — Verse Two",
-    description: "A sibling page to the front experience: a few pictures and a video at the end.",
-  },
+  description: "Lumiere"
 };
 
-type MediaItem =
-  | { type: "image"; src: string; alt?: string; aspect?: "landscape" | "portrait" | "square" }
-  | { type: "video"; src: string; poster?: string };
+'use client'
+import { useEffect, useState } from 'react';
+import StickyImageSection from '@/components/StickyImageSection';
+import { VideoSection } from '../VideoSectionVerseTwo';
+import ScrollIndicator from '@/components/ScrollIndicator';
 
-const media: MediaItem[] = [
-  // 1) Image
-  { type: "image", src: "/media/verse2-1.png", alt: "Frame 1", aspect: "landscape" },
+// Import user's images
+import handsImage from '@assets/ChatGPT Image Sep 24, 2025, 05_29_45 PM_1758729617680.png';
+import coatImage from '@assets/ChatGPT Image Sep 24, 2025, 06_48_49 PM_1758729617679.png';
 
-  // 2) Video
-  { type: "video", src: "/media/verse2-clip-1.mov", poster: "/media/verse2-clip-1-poster.jpg" },
+export default function Home() {
+    const [globalScrollProgress, setGlobalScrollProgress] = useState(0);
 
-  // 3) Image
-  { type: "image", src: "/media/verse2-2.png", alt: "Frame 2", aspect: "portrait" },
+    useEffect(() => {
+        // Smooth scrolling with resistance
+        document.documentElement.style.scrollBehavior = 'auto';
 
-  // 4) Image
-  { type: "image", src: "/media/55124M.png", alt: "Frame 3", aspect: "landscape" },
+        const handleScroll = () => {
+            const scrolled = window.scrollY;
+            const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+            const progress = scrolled / maxScroll;
+            setGlobalScrollProgress(progress);
+        };
 
-  // 5) Video
-  { type: "video", src: "/media/0929.mp4", poster: "/media/verse2-clip-2-poster.jpg" },
-];
+        // Add scroll resistance
+        let scrollTimeout: NodeJS.Timeout;
+        const handleScrollWithResistance = (e: WheelEvent) => {
+            clearTimeout(scrollTimeout);
 
-function aspectClass(a?: "landscape" | "portrait" | "square") {
-  if (a === "portrait") return "aspect-[3/4]";
-  if (a === "square") return "aspect-square";
-  return "aspect-[16/9]"; // default landscape
-}
+            // Add slight resistance to scrolling
+            const resistance = 0.7;
+            const dampedDelta = e.deltaY * resistance;
 
-export default function VerseTwoPage() {
-  return (
-    <main className="relative min-h-[100svh] bg-black text-white">
-      {/* Tiny corner nav to preserve the minimalist feel */}
-      <div className="pointer-events-auto fixed left-4 top-4 z-50">
-        <Link
-          href="/"
-          className="rounded-full border border-white/20 px-3 py-1.5 text-xs tracking-wide text-white/80 hover:border-white/40 hover:text-white"
+            window.scrollBy({
+                top: dampedDelta,
+                behavior: 'auto'
+            });
+
+            e.preventDefault();
+
+            scrollTimeout = setTimeout(() => {
+                handleScroll();
+            }, 16);
+        };
+
+        window.addEventListener('wheel', handleScrollWithResistance, { passive: false });
+        window.addEventListener('scroll', handleScroll);
+        handleScroll();
+
+        return () => {
+            document.documentElement.style.scrollBehavior = 'auto';
+            window.removeEventListener('wheel', handleScrollWithResistance);
+            window.removeEventListener('scroll', handleScroll);
+            clearTimeout(scrollTimeout);
+        };
+    }, []);
+
+    return (
+        <div
+            className="min-h-screen"
+            style={{
+                background: `linear-gradient(to bottom, 
+          rgb(10, 10, 10) 0%, 
+          rgb(5, 5, 5) 50%, 
+          rgb(0, 0, 0) 100%)`
+            }}
         >
-          ← Home
-        </Link>
-      </div>
+            <ScrollIndicator />
 
-      {/* Stack of media blocks */}
-      <section className="mx-auto flex w-full max-w-[120rem] flex-col">
-        {media.map((m, i) => {
-          if (m.type === "image") {
-            return (
-              <figure
-                key={`img-${i}`}
-                className={`w-full ${aspectClass(m.aspect)} relative isolate`}
-              >
-                <Image
-                  src={m.src}
-                  alt={m.alt ?? ""}
-                  fill
-                  priority={i === 0}
-                  sizes="100vw"
-                  className="object-cover"
-                />
-              </figure>
-            );
-          }
+            <StickyImageSection
+                imageSrc={'/verse2-1.png'}
+                sectionIndex={0}
+                totalSections={3}
+            />
 
-          // video block (always last in your flow)
-          return (
-            <figure key={`vid-${i}`} className="relative w-full">
-              <div className="relative mx-auto w-full max-w-7xl px-0 md:px-4">
-                <div className="relative aspect-[16/9] w-full overflow-hidden">
-                  <video
-                    className="h-full w-full object-cover"
-                    playsInline
-                    controls
-                    preload="metadata"
-                    poster={m.poster}
-                  >
-                    <source src={m.src} type="video/mp4" />
-                    Your browser does not support the video tag.
-                  </video>
+            {/* Coat Image - Second Sticky Section */}
+
+            <StickyImageSection
+                imageSrc={'/verse2-2.png'}
+                sectionIndex={1}
+                totalSections={3}
+            />
+
+            {/* Text Section - Third Sticky Section */}
+            <div
+                className="relative h-screen flex items-center justify-center"
+                style={{
+                    background: `linear-gradient(to bottom, 
+            rgba(0,0,0,0.8) 0%, 
+            rgba(0,0,0,0.95) 100%)`
+                }}
+            >
+                <div className="text-center max-w-2xl px-4 sm:px-8">
+                    <div
+                        className="text-2xl sm:text-3xl md:text-5xl font-light tracking-wide text-white/90 leading-relaxed font-[Inter]"
+                        style={{
+                            textShadow: '0 2px 20px rgba(0,0,0,0.8)'
+                        }}
+                    >
+                        <div className="sm:whitespace-nowrap">We're swaying to drum beats</div>
+                        <div><em className="text-white/70">In motion, I'm feeling..</em></div>
+                    </div>
                 </div>
-              </div>
-            </figure>
-          );
-        })}
-      </section>
+            </div>
 
-      {/* Minimal footer spacer */}
-      <div className="h-20" />
-    </main>
-  );
+            {/* Video Section */}
+            <div
+                className="relative"
+                style={{
+                    background: 'linear-gradient(to bottom, rgba(0,0,0,0.95) 0%, rgb(0,0,0) 100%)'
+                }}
+            >
+                <VideoSection />
+            </div>
+
+            {/* Final dark section */}
+            <div className="h-32 bg-black" />
+        </div>
+    );
 }
