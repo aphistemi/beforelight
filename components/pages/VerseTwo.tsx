@@ -3,43 +3,79 @@
 import ScrollIndicator from "@/components/ScrollIndicator";
 import StickyImageSection from "@/components/StickyImageSection";
 import { Link } from "wouter";
+import { useEffect, useRef, useState } from "react";
 
-// 🎬 Video section that preserves portrait vs landscape aspect ratios
+// Reusable fade-in wrapper for any section
+function FadeInOnView({
+  children,
+  delay = 0,
+}: {
+  children: React.ReactNode;
+  delay?: number;
+}) {
+  const ref = useRef<HTMLDivElement | null>(null);
+  const [shown, setShown] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    const obs = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) {
+            setShown(true);
+            // Once shown, we can stop observing to avoid re-triggers
+            obs.disconnect();
+          }
+        });
+      },
+      { rootMargin: "0px 0px -10% 0px", threshold: 0.1 }
+    );
+
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
+  return (
+    <div
+      ref={ref}
+      className={`transition-all duration-500 ease-out will-change-[opacity,transform] ${
+        shown ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
+      }`}
+      style={{ transitionDelay: `${delay}ms` }}
+    >
+      {children}
+    </div>
+  );
+}
+
+// 🎬 Video section (only one, horizontal)
 function FullscreenVideo({
   src,
   poster,
-  vertical = false,
 }: {
   src: string;
   poster?: string;
-  vertical?: boolean;
 }) {
   return (
     <section
       className="relative flex items-center justify-center py-16"
       style={{
         background:
-          "linear-gradient(to bottom, rgba(0,0,0,0.95) 0%, rgb(0,0,0) 100%)",
+          "linear-gradient(to bottom, rgba(0,0,0,0.98) 0%, rgb(0,0,0) 100%)",
       }}
     >
-      <div
-        className={
-          "relative w-full overflow-hidden rounded-xl border border-white/10 shadow-xl " +
-          (vertical
-            ? "max-w-[400px]" // portrait: tall & centered
-            : "max-w-6xl aspect-[16/9]") // landscape: cinematic 16:9
-        }
-      >
+      <div className="relative w-full max-w-6xl aspect-[16/9] overflow-hidden rounded-xl border border-white/10 shadow-lg">
         <video
-          className={vertical ? "w-full h-auto object-contain" : "w-full h-full object-cover"}
+          className="w-full h-full object-cover"
           playsInline
           controls
           preload="metadata"
           poster={poster}
           src={src}
-          muted={false} // ✅ start unmuted
+          muted={false}
           onPlay={(e) => {
-            // in case browser forces mute, unmute on user interaction
             if (e.currentTarget.muted) e.currentTarget.muted = false;
           }}
         />
@@ -49,86 +85,83 @@ function FullscreenVideo({
 }
 
 export default function VerseTwo() {
-  // ✅ Confirmed image + video sources
+  // ✅ Keep only two images and one video
   const IMG_1 = "/verse2-1.png";
-  const IMG_2 = "/verse2-2.png";
   const IMG_3 = "/guts.jpeg";
-  const VID_1 =
-    "https://4jonbnyt0iufuysl.public.blob.vercel-storage.com/1005.mp4"; // portrait
   const VID_2 =
-    "https://4jonbnyt0iufuysl.public.blob.vercel-storage.com/0929.mp4"; // landscape
+    "https://4jonbnyt0iufuysl.public.blob.vercel-storage.com/0929.mp4"; // updated URL
 
-  const totalSticky = 3;
+  const totalSticky = 2;
 
   return (
     <div
       className="min-h-screen"
       style={{
-        background: `linear-gradient(to bottom, 
-          rgb(10, 10, 10) 0%, 
-          rgb(5, 5, 5) 50%, 
-          rgb(0, 0, 0) 100%)`,
+        background: `linear-gradient(to bottom,
+          rgb(10,10,10) 0%,
+          rgb(5,5,5) 40%,
+          rgb(0,0,0) 100%)`,
       }}
     >
       <ScrollIndicator />
 
       {/* Sticky Image 1 */}
-      <StickyImageSection
-        imageSrc={IMG_1}
-        sectionIndex={0}
-        totalSections={totalSticky}
-      />
+      <FadeInOnView>
+        <StickyImageSection
+          imageSrc={IMG_1}
+          sectionIndex={0}
+          totalSections={totalSticky}
+        />
+      </FadeInOnView>
 
-      {/* Sticky Image 2 */}
-      <StickyImageSection
-        imageSrc={IMG_2}
-        sectionIndex={1}
-        totalSections={totalSticky}
-      />
-
-      {/* Text break */}
-      <div
-        className="relative h-screen flex items-center justify-center"
-        style={{
-          background: `linear-gradient(to bottom, 
-            rgba(0,0,0,0.8) 0%, 
-            rgba(0,0,0,0.95) 100%)`,
-        }}
-      >
-        <div className="text-center max-w-2xl px-4 sm:px-8">
-          <div
-            className="text-2xl sm:text-3xl md:text-5xl font-light tracking-wide text-white/90 leading-relaxed font-[Inter]"
-            style={{ textShadow: "0 2px 20px rgba(0,0,0,0.8)" }}
-          >
-            <div className="sm:whitespace-nowrap">Second verse</div>
-            <div>
-              <em className="text-white/70">Same pulse, different angle.</em>
+      {/* Dimmer text section between elements */}
+      <FadeInOnView delay={80}>
+        <div
+          className="relative h-screen flex items-center justify-center"
+          style={{
+            background: `linear-gradient(to bottom,
+              rgba(0,0,0,0.9) 0%,
+              rgba(0,0,0,0.98) 100%)`,
+          }}
+        >
+          <div className="text-center max-w-2xl px-4 sm:px-8">
+            <div
+              className="text-2xl sm:text-3xl md:text-5xl font-light tracking-wide text-white/80 leading-relaxed font-[Inter]"
+              style={{ textShadow: "0 2px 10px rgba(0,0,0,0.7)" }}
+            >
+              <div className="sm:whitespace-nowrap">Second verse</div>
+              <div>
+                <em className="text-white/60">Same pulse, different angle.</em>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </FadeInOnView>
 
-      {/* 🎥 Video 1 — portrait */}
-      <FullscreenVideo src={VID_1} vertical />
+      {/* Sticky Image 2 */}
+      <FadeInOnView delay={120}>
+        <StickyImageSection
+          imageSrc={IMG_3}
+          sectionIndex={1}
+          totalSections={totalSticky}
+        />
+      </FadeInOnView>
 
-      {/* Sticky Image 3 */}
-      <StickyImageSection
-        imageSrc={IMG_3}
-        sectionIndex={2}
-        totalSections={totalSticky}
-      />
-
-      {/* 🎥 Video 2 — landscape */}
-      <FullscreenVideo src={VID_2} />
+      {/* 🎥 Only one video now */}
+      <FadeInOnView delay={160}>
+        <FullscreenVideo src={VID_2} />
+      </FadeInOnView>
 
       {/* ⬅️ Back home button */}
-      <div className="w-full text-center py-10">
-        <Link href="/">
-          <button className="border border-white/30 text-white px-6 py-3 rounded-full text-sm tracking-wide hover:border-white hover:bg-white/10 transition-all duration-300">
-            Back home →
-          </button>
-        </Link>
-      </div>
+      <FadeInOnView delay={200}>
+        <div className="w-full text-center py-10">
+          <Link href="/">
+            <button className="border border-white/30 text-white px-6 py-3 rounded-full text-sm tracking-wide hover:border-white hover:bg-white/10 transition-all duration-300">
+              Back home →
+            </button>
+          </Link>
+        </div>
+      </FadeInOnView>
 
       <div className="h-32 bg-black" />
     </div>
