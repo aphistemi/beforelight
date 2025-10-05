@@ -25,7 +25,6 @@ function FadeInOnView({
         entries.forEach((e) => {
           if (e.isIntersecting) {
             setShown(true);
-            // Once shown, we can stop observing to avoid re-triggers
             obs.disconnect();
           }
         });
@@ -50,6 +49,35 @@ function FadeInOnView({
   );
 }
 
+/** Subtle vertical glow between sections (very gentle). */
+function SectionDivider({ height = 96 }: { height?: number }) {
+  return (
+    <div
+      style={{ height }}
+      className="relative w-full"
+      aria-hidden
+    >
+      {/* faint soft light */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            "linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(255,255,255,0.05) 50%, rgba(0,0,0,0) 100%)",
+          filter: "blur(6px)",
+        }}
+      />
+      {/* gentle dark falloff to avoid hard seams */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            "linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0) 40%, rgba(0,0,0,0) 60%, rgba(0,0,0,0.15) 100%)",
+        }}
+      />
+    </div>
+  );
+}
+
 // 🎬 Video section (only one, horizontal)
 function FullscreenVideo({
   src,
@@ -66,6 +94,14 @@ function FullscreenVideo({
           "linear-gradient(to bottom, rgba(0,0,0,0.98) 0%, rgb(0,0,0) 100%)",
       }}
     >
+      {/* top/bottom vignette to hide any seams in the video container */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-16"
+        style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.35), rgba(0,0,0,0))" }}
+      />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16"
+        style={{ background: "linear-gradient(to top, rgba(0,0,0,0.35), rgba(0,0,0,0))" }}
+      />
+
       <div className="relative w-full max-w-6xl aspect-[16/9] overflow-hidden rounded-xl border border-white/10 shadow-lg">
         <video
           className="w-full h-full object-cover"
@@ -138,6 +174,9 @@ export default function VerseTwo() {
         </div>
       </FadeInOnView>
 
+      {/* ✨ Subtle glow between text and last photo */}
+      <SectionDivider height={84} />
+
       {/* Sticky Image 2 */}
       <FadeInOnView delay={120}>
         <StickyImageSection
@@ -146,6 +185,9 @@ export default function VerseTwo() {
           totalSections={totalSticky}
         />
       </FadeInOnView>
+
+      {/* ✨ Subtle glow between last photo and video */}
+      <SectionDivider height={84} />
 
       {/* 🎥 Only one video now */}
       <FadeInOnView delay={160}>
