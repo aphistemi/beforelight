@@ -5,7 +5,7 @@ import StickyImageSection from "@/components/StickyImageSection";
 import { Link } from "wouter";
 import { useEffect, useRef, useState } from "react";
 
-// Reusable fade-in wrapper for any section
+// ---------------- Fade-in wrapper ----------------
 function FadeInOnView({
   children,
   delay = 0,
@@ -47,8 +47,9 @@ function FadeInOnView({
   );
 }
 
-// Thin gradient blocks that match the homepage dividers
-function SpacerTextToSection({ h = 84 }: { h?: number }) {
+// --------------- Homepage-style spacers ---------------
+/** Text -> next section style (0.8 -> 0.95), used BEFORE text. */
+function SpacerTextLead({ h = 56 }: { h?: number }) {
   return (
     <div
       className="w-full"
@@ -61,7 +62,9 @@ function SpacerTextToSection({ h = 84 }: { h?: number }) {
     />
   );
 }
-function SpacerBeforeVideo({ h = 84 }: { h?: number }) {
+
+/** Before video (0.95 -> 1.0), used before video and also before the button. */
+function SpacerToSolid({ h = 84 }: { h?: number }) {
   return (
     <div
       className="w-full"
@@ -75,7 +78,7 @@ function SpacerBeforeVideo({ h = 84 }: { h?: number }) {
   );
 }
 
-// Single horizontal video section
+// ---------------- Video section ----------------
 function FullscreenVideo({
   src,
   poster,
@@ -109,8 +112,9 @@ function FullscreenVideo({
   );
 }
 
+// ---------------- Page ----------------
 export default function VerseTwo() {
-  // Keep only two images and one video
+  // Only two images and one video
   const IMG_1 = "/verse2-1.png";
   const IMG_3 = "/guts.jpeg";
   const VID_2 =
@@ -130,7 +134,7 @@ export default function VerseTwo() {
     >
       <ScrollIndicator />
 
-      {/* Sticky Image 1 */}
+      {/* Image 1 */}
       <FadeInOnView>
         <StickyImageSection
           imageSrc={IMG_1}
@@ -139,11 +143,15 @@ export default function VerseTwo() {
         />
       </FadeInOnView>
 
-      {/* Text section (same gradient as home text block) */}
+      {/* Divider BETWEEN image 1 -> text (smaller than before) */}
+      <SpacerTextLead h={56} />
+
+      {/* Text block (shorter than a full screen to tighten spacing) */}
       <FadeInOnView delay={80}>
         <div
-          className="relative h-screen flex items-center justify-center"
+          className="relative flex items-center justify-center"
           style={{
+            minHeight: "70vh",
             background: `linear-gradient(to bottom,
               rgba(0,0,0,0.8) 0%,
               rgba(0,0,0,0.95) 100%)`,
@@ -151,22 +159,21 @@ export default function VerseTwo() {
         >
           <div className="text-center max-w-2xl px-4 sm:px-8">
             <div
-              className="text-2xl sm:text-3xl md:text-5xl font-light tracking-wide text-white/80 leading-relaxed font-[Inter]"
+              className="text-2xl sm:text-3xl md:text-5xl font-light tracking-wide text-white/85 leading-relaxed font-[Inter]"
               style={{ textShadow: "0 2px 10px rgba(0,0,0,0.7)" }}
             >
-              <div className="sm:whitespace-nowrap">Second verse</div>
+              <div className="sm:whitespace-nowrap">And their echoes sit alone</div>
               <div>
-                <em className="text-white/60">Same pulse, different angle.</em>
+                <em className="text-white/70">In a prison made of bone</em>
               </div>
             </div>
           </div>
         </div>
       </FadeInOnView>
 
-      {/* Divider matching home: text (0.8→0.95) → next section */}
-      <SpacerTextToSection />
+      {/* ⛔ No divider after the text per your request */}
 
-      {/* Sticky Image 2 */}
+      {/* Image 2 */}
       <FadeInOnView delay={120}>
         <StickyImageSection
           imageSrc={IMG_3}
@@ -175,15 +182,18 @@ export default function VerseTwo() {
         />
       </FadeInOnView>
 
-      {/* Divider matching home: before video (0.95→1) */}
-      <SpacerBeforeVideo />
+      {/* Divider BETWEEN image 2 -> video */}
+      <SpacerToSolid h={84} />
 
       {/* Video */}
       <FadeInOnView delay={160}>
         <FullscreenVideo src={VID_2} />
       </FadeInOnView>
 
-      {/* Back home */}
+      {/* Divider BETWEEN video -> button */}
+      <SpacerToSolid h={72} />
+
+      {/* Back home button */}
       <FadeInOnView delay={200}>
         <div className="w-full text-center py-10">
           <Link href="/">
