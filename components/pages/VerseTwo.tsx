@@ -5,7 +5,7 @@ import ScrollIndicator from "@/components/ScrollIndicator";
 import StickyImageSection from "@/components/StickyImageSection";
 import { Link } from "wouter";
 
-/* ---------------------- Fade-in wrapper ---------------------- */
+/* Fade-in wrapper for sections */
 function FadeInOnView({
   children,
   delay = 0,
@@ -21,12 +21,13 @@ function FadeInOnView({
     if (!el) return;
     const obs = new IntersectionObserver(
       (entries) => {
-        entries.forEach((e) => {
+        for (const e of entries) {
           if (e.isIntersecting) {
             setShown(true);
             obs.disconnect();
+            break;
           }
-        });
+        }
       },
       { rootMargin: "0px 0px -10% 0px", threshold: 0.1 }
     );
@@ -47,7 +48,7 @@ function FadeInOnView({
   );
 }
 
-/* ---------------------- Spacers (matching homepage) ---------------------- */
+/* Spacers matching homepage */
 function SpacerTextLead({ h = 56 }: { h?: number }) {
   return (
     <div
@@ -75,12 +76,7 @@ function SpacerToSolid({ h = 84 }: { h?: number }) {
   );
 }
 
-/* ---------------------- Clean collapsing header ----------------------
-   - Full-bleed, sticky 100vh.
-   - No overlays / tints (video colors unchanged).
-   - Opacity fades with scroll; optional soft mask to help it vanish.
-   - Delimiting lines at bottom to frame the header area.
------------------------------------------------------------------------ */
+/* Collapsing header with proper scroll math (no tint/mask) */
 function CollapsingHeader({
   videoSrc,
   headline,
@@ -89,35 +85,37 @@ function CollapsingHeader({
   headline: string;
 }) {
   const wrapRef = useRef<HTMLDivElement | null>(null);
-  const [t, setT] = useState(0);
+  const [p, setP] = useState(0); // 0 at top, 1 when faded out
 
   useEffect(() => {
     const el = wrapRef.current;
     if (!el) return;
 
-    const onScroll = () => {
-      const rect = el.getBoundingClientRect();
-      const vh = window.innerHeight;
-      // Scroll window for fade: 0..1 across ~0.9 * viewport height
-      const scrolled = Math.min(Math.max(vh - rect.top, 0), vh * 0.9);
-      setT(scrolled / (vh * 0.9));
+    const compute = () => {
+      const start = el.offsetTop; // top of the header wrapper
+      const fadeDistance = window.innerHeight * 0.9; // how far to scroll before fully faded
+      const y = window.scrollY;
+      const raw = (y - start) / fadeDistance;
+      const clamped = Math.max(0, Math.min(1, raw));
+      setP(clamped);
     };
 
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
+    compute();
+    window.addEventListener("scroll", compute, { passive: true });
+    window.addEventListener("resize", compute);
     return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
+      window.removeEventListener("scroll", compute);
+      window.removeEventListener("resize", compute);
     };
   }, []);
 
-  const opacity = 1 - t; // 1 → 0
+  const videoOpacity = 1 - p;      // fade video out
+  const textOpacity = 1 - p * 0.8; // text lingers a bit longer
 
   return (
     <section ref={wrapRef} style={{ height: "160vh" }} className="relative">
       <div className="sticky top-0 h-[100vh] w-full overflow-hidden bg-black">
-        {/* Video (raw color) */}
+        {/* Raw-color video */}
         <video
           className="absolute inset-0 w-full h-full object-cover"
           playsInline
@@ -128,22 +126,17 @@ function CollapsingHeader({
           preload="metadata"
           src={videoSrc}
           style={{
-            opacity,
+            opacity: videoOpacity,
             transition: "opacity 120ms linear",
-            // optional soft top fade (alpha-only; no color change)
-            WebkitMaskImage:
-              "linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, rgba(0,0,0,1) 18%, rgba(0,0,0,1) 100%)",
-            maskImage:
-              "linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, rgba(0,0,0,1) 18%, rgba(0,0,0,1) 100%)",
-          } as React.CSSProperties}
+          }}
         />
 
-        {/* Headline on top of the video */}
+        {/* Headline on top of video */}
         <div className="relative z-10 flex h-full items-center justify-center px-6 text-center">
           <h1
             className="max-w-5xl text-white"
             style={{
-              opacity,
+              opacity: textOpacity,
               transition: "opacity 120ms linear",
               textShadow: "0 2px 18px rgba(0,0,0,0.6)",
               fontWeight: 300,
@@ -152,11 +145,11 @@ function CollapsingHeader({
               fontSize: "clamp(28px, 4vw, 44px)",
             }}
           >
-            In the dark, the deer mistook my headlights for stars.
+            {headline}
           </h1>
         </div>
 
-        {/* Bottom delimiter lines to frame the header (no color change to video) */}
+        {/* Bottom delimiters to frame header */}
         <div className="absolute inset-x-0 bottom-0 h-px bg-white/10 pointer-events-none" />
         <div className="absolute inset-x-0 -bottom-2 h-px bg-white/5 pointer-events-none" />
       </div>
@@ -164,7 +157,7 @@ function CollapsingHeader({
   );
 }
 
-/* ---------------------- Closing video section ---------------------- */
+/* Closing video section (landscape, with sound on play) */
 function FullscreenVideo({ src, poster }: { src: string; poster?: string }) {
   return (
     <section
@@ -214,10 +207,13 @@ export default function VerseTwo() {
     >
       <ScrollIndicator />
 
-      {/* HEADER — raw video colors, fading away on scroll, text on top */}
-      <CollapsingHeader videoSrc={HEADER_VIDEO} headline="" />
+      {/* HEADER — raw video colors + headline, fades out on scroll */}
+      <CollapsingHeader
+        videoSrc={HEADER_VIDEO}
+        headline="In the dark, the deer mistook my headlights for stars."
+      />
 
-      {/* Divider after header to separate clearly */}
+      {/* Clear separator after header */}
       <div className="w-full h-6 bg-gradient-to-b from-black/0 to-black" aria-hidden />
 
       {/* Image 1 */}
