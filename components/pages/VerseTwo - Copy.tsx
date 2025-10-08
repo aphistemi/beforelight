@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import ScrollIndicator from "@/components/ScrollIndicator";
 import StickyImageSection from "@/components/StickyImageSection";
 import { Link } from "wouter";
+import { useEffect, useRef, useState } from "react";
 
-/* ---------------------- Fade-in wrapper ---------------------- */
+// ---------------- Fade-in wrapper ----------------
 function FadeInOnView({
   children,
   delay = 0,
@@ -47,7 +47,8 @@ function FadeInOnView({
   );
 }
 
-/* ---------------------- Spacers (matching homepage) ---------------------- */
+// --------------- Homepage-style spacers ---------------
+/** Text -> next section style (0.8 -> 0.95), used BEFORE text. */
 function SpacerTextLead({ h = 56 }: { h?: number }) {
   return (
     <div
@@ -62,6 +63,7 @@ function SpacerTextLead({ h = 56 }: { h?: number }) {
   );
 }
 
+/** Before video (0.95 -> 1.0), used before video and also before the button. */
 function SpacerToSolid({ h = 84 }: { h?: number }) {
   return (
     <div
@@ -76,104 +78,14 @@ function SpacerToSolid({ h = 84 }: { h?: number }) {
   );
 }
 
-/* ---------------------- Collapsing Header ---------------------- */
-function CollapsingHeader({
-  videoSrc,
-  headline,
+// ---------------- Video section ----------------
+function FullscreenVideo({
+  src,
+  poster,
 }: {
-  videoSrc: string;
-  headline: string;
+  src: string;
+  poster?: string;
 }) {
-  const wrapRef = useRef<HTMLDivElement | null>(null);
-  const [t, setT] = useState(0);
-
-  useEffect(() => {
-    const el = wrapRef.current;
-    if (!el) return;
-
-    const onScroll = () => {
-      const rect = el.getBoundingClientRect();
-      const vh = window.innerHeight;
-      const scrolled = Math.min(Math.max(vh - rect.top, 0), vh * 0.9);
-      const p = scrolled / (vh * 0.9);
-      setT(p);
-    };
-
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
-    };
-  }, []);
-
-  const opacity = 1 - t;
-  const scale = 1 - t * 0.06;
-  const overlayOpacity = Math.min(0.4 + t * 0.4, 0.8);
-  const maskStop = Math.round(40 + t * 40);
-
-  return (
-    <section ref={wrapRef} style={{ height: "180vh" }} className="relative">
-      <div className="sticky top-0 h-[100vh] w-full overflow-hidden bg-black">
-        {/* Video layer */}
-        <div
-          className="absolute inset-0 transition-transform"
-          style={{ transform: `scale(${scale})`, transformOrigin: "center" }}
-        >
-          <video
-            className="w-full h-full object-cover"
-            playsInline
-            autoPlay
-            muted
-            loop
-            controls={false}
-            preload="metadata"
-            src={videoSrc}
-            style={{
-              WebkitMaskImage: `linear-gradient(to bottom, rgba(0,0,0,${
-                maskStop / 100
-              }) 0%, rgba(0,0,0,1) 25%, rgba(0,0,0,1) 100%)`,
-              maskImage: `linear-gradient(to bottom, rgba(0,0,0,${
-                maskStop / 100
-              }) 0%, rgba(0,0,0,1) 25%, rgba(0,0,0,1) 100%)`,
-            } as React.CSSProperties}
-          />
-        </div>
-
-        {/* Dark overlay */}
-        <div
-          className="absolute inset-0"
-          style={{
-            background: `rgba(0,0,0,${overlayOpacity})`,
-            transition: "background 200ms linear",
-          }}
-        />
-
-        {/* Headline */}
-        <div className="relative z-10 flex h-full items-center justify-center px-6 text-center">
-          <h1
-            className="max-w-5xl text-white"
-            style={{
-              opacity,
-              transition: "opacity 150ms linear",
-              textShadow: "0 2px 20px rgba(0,0,0,0.7)",
-              fontWeight: 300,
-              lineHeight: 1.25,
-              letterSpacing: "0.01em",
-              fontSize: "clamp(28px, 4vw, 44px)",
-            }}
-          >
-            {headline}
-          </h1>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ---------------------- Video Section ---------------------- */
-function FullscreenVideo({ src, poster }: { src: string; poster?: string }) {
   return (
     <section
       className="relative flex items-center justify-center py-16"
@@ -200,13 +112,12 @@ function FullscreenVideo({ src, poster }: { src: string; poster?: string }) {
   );
 }
 
-/* ---------------------- Page ---------------------- */
+// ---------------- Page ----------------
 export default function VerseTwo() {
-  const HEADER_VIDEO =
-    "https://4jonbnyt0iufuysl.public.blob.vercel-storage.com/videoloopbw.webm";
+  // Only two images and one video
   const IMG_1 = "/verse2-1.png";
   const IMG_3 = "/guts.jpeg";
-  const END_VIDEO =
+  const VID_2 =
     "https://4jonbnyt0iufuysl.public.blob.vercel-storage.com/0929.mp4";
 
   const totalSticky = 2;
@@ -223,15 +134,6 @@ export default function VerseTwo() {
     >
       <ScrollIndicator />
 
-      {/* Header video */}
-      <CollapsingHeader
-        videoSrc={HEADER_VIDEO}
-        headline="In the dark, the deer mistook my headlights for stars."
-      />
-
-      {/* Divider after header */}
-      <SpacerToSolid h={84} />
-
       {/* Image 1 */}
       <FadeInOnView>
         <StickyImageSection
@@ -241,14 +143,15 @@ export default function VerseTwo() {
         />
       </FadeInOnView>
 
+      {/* Divider BETWEEN image 1 -> text (smaller than before) */}
       <SpacerTextLead h={56} />
 
-      {/* Poetic text block */}
+      {/* Text block (shorter than a full screen to tighten spacing) */}
       <FadeInOnView delay={80}>
         <div
           className="relative flex items-center justify-center"
           style={{
-            minHeight: "60vh",
+            minHeight: "70vh",
             background: `linear-gradient(to bottom,
               rgba(0,0,0,0.8) 0%,
               rgba(0,0,0,0.95) 100%)`,
@@ -268,6 +171,8 @@ export default function VerseTwo() {
         </div>
       </FadeInOnView>
 
+      {/* ⛔ No divider after the text per your request */}
+
       {/* Image 2 */}
       <FadeInOnView delay={120}>
         <StickyImageSection
@@ -277,13 +182,15 @@ export default function VerseTwo() {
         />
       </FadeInOnView>
 
+      {/* Divider BETWEEN image 2 -> video */}
       <SpacerToSolid h={84} />
 
-      {/* Closing video */}
+      {/* Video */}
       <FadeInOnView delay={160}>
-        <FullscreenVideo src={END_VIDEO} />
+        <FullscreenVideo src={VID_2} />
       </FadeInOnView>
 
+      {/* Divider BETWEEN video -> button */}
       <SpacerToSolid h={72} />
 
       {/* Back home button */}
