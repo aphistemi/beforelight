@@ -61,7 +61,6 @@ function SpacerTextLead({ h = 56 }: { h?: number }) {
     />
   );
 }
-
 function SpacerToSolid({ h = 84 }: { h?: number }) {
   return (
     <div
@@ -76,7 +75,12 @@ function SpacerToSolid({ h = 84 }: { h?: number }) {
   );
 }
 
-/* ---------------------- Collapsing Header ---------------------- */
+/* ---------------------- Clean collapsing header ----------------------
+   - Full-bleed, sticky 100vh.
+   - No overlays / tints (video colors unchanged).
+   - Opacity fades with scroll; optional soft mask to help it vanish.
+   - Delimiting lines at bottom to frame the header area.
+----------------------------------------------------------------------- */
 function CollapsingHeader({
   videoSrc,
   headline,
@@ -94,9 +98,9 @@ function CollapsingHeader({
     const onScroll = () => {
       const rect = el.getBoundingClientRect();
       const vh = window.innerHeight;
+      // Scroll window for fade: 0..1 across ~0.9 * viewport height
       const scrolled = Math.min(Math.max(vh - rect.top, 0), vh * 0.9);
-      const p = scrolled / (vh * 0.9);
-      setT(p);
+      setT(scrolled / (vh * 0.9));
     };
 
     onScroll();
@@ -108,71 +112,59 @@ function CollapsingHeader({
     };
   }, []);
 
-  const opacity = 1 - t;
-  const scale = 1 - t * 0.06;
-  const overlayOpacity = Math.min(0.4 + t * 0.4, 0.8);
-  const maskStop = Math.round(40 + t * 40);
+  const opacity = 1 - t; // 1 → 0
 
   return (
-    <section ref={wrapRef} style={{ height: "180vh" }} className="relative">
+    <section ref={wrapRef} style={{ height: "160vh" }} className="relative">
       <div className="sticky top-0 h-[100vh] w-full overflow-hidden bg-black">
-        {/* Video layer */}
-        <div
-          className="absolute inset-0 transition-transform"
-          style={{ transform: `scale(${scale})`, transformOrigin: "center" }}
-        >
-          <video
-            className="w-full h-full object-cover"
-            playsInline
-            autoPlay
-            muted
-            loop
-            controls={false}
-            preload="metadata"
-            src={videoSrc}
-            style={{
-              WebkitMaskImage: `linear-gradient(to bottom, rgba(0,0,0,${
-                maskStop / 100
-              }) 0%, rgba(0,0,0,1) 25%, rgba(0,0,0,1) 100%)`,
-              maskImage: `linear-gradient(to bottom, rgba(0,0,0,${
-                maskStop / 100
-              }) 0%, rgba(0,0,0,1) 25%, rgba(0,0,0,1) 100%)`,
-            } as React.CSSProperties}
-          />
-        </div>
-
-        {/* Dark overlay */}
-        <div
-          className="absolute inset-0"
+        {/* Video (raw color) */}
+        <video
+          className="absolute inset-0 w-full h-full object-cover"
+          playsInline
+          autoPlay
+          muted
+          loop
+          controls={false}
+          preload="metadata"
+          src={videoSrc}
           style={{
-            background: `rgba(0,0,0,${overlayOpacity})`,
-            transition: "background 200ms linear",
-          }}
+            opacity,
+            transition: "opacity 120ms linear",
+            // optional soft top fade (alpha-only; no color change)
+            WebkitMaskImage:
+              "linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, rgba(0,0,0,1) 18%, rgba(0,0,0,1) 100%)",
+            maskImage:
+              "linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, rgba(0,0,0,1) 18%, rgba(0,0,0,1) 100%)",
+          } as React.CSSProperties}
         />
 
-        {/* Headline */}
+        {/* Headline on top of the video */}
         <div className="relative z-10 flex h-full items-center justify-center px-6 text-center">
           <h1
             className="max-w-5xl text-white"
             style={{
               opacity,
-              transition: "opacity 150ms linear",
-              textShadow: "0 2px 20px rgba(0,0,0,0.7)",
+              transition: "opacity 120ms linear",
+              textShadow: "0 2px 18px rgba(0,0,0,0.6)",
               fontWeight: 300,
               lineHeight: 1.25,
               letterSpacing: "0.01em",
               fontSize: "clamp(28px, 4vw, 44px)",
             }}
           >
-            {headline}
+            In the dark, the deer mistook my headlights for stars.
           </h1>
         </div>
+
+        {/* Bottom delimiter lines to frame the header (no color change to video) */}
+        <div className="absolute inset-x-0 bottom-0 h-px bg-white/10 pointer-events-none" />
+        <div className="absolute inset-x-0 -bottom-2 h-px bg-white/5 pointer-events-none" />
       </div>
     </section>
   );
 }
 
-/* ---------------------- Video Section ---------------------- */
+/* ---------------------- Closing video section ---------------------- */
 function FullscreenVideo({ src, poster }: { src: string; poster?: string }) {
   return (
     <section
@@ -200,7 +192,6 @@ function FullscreenVideo({ src, poster }: { src: string; poster?: string }) {
   );
 }
 
-/* ---------------------- Page ---------------------- */
 export default function VerseTwo() {
   const HEADER_VIDEO =
     "https://4jonbnyt0iufuysl.public.blob.vercel-storage.com/videoloopbw.webm";
@@ -223,14 +214,11 @@ export default function VerseTwo() {
     >
       <ScrollIndicator />
 
-      {/* Header video */}
-      <CollapsingHeader
-        videoSrc={HEADER_VIDEO}
-        headline="In the dark, the deer mistook my headlights for stars."
-      />
+      {/* HEADER — raw video colors, fading away on scroll, text on top */}
+      <CollapsingHeader videoSrc={HEADER_VIDEO} headline="" />
 
-      {/* Divider after header */}
-      <SpacerToSolid h={84} />
+      {/* Divider after header to separate clearly */}
+      <div className="w-full h-6 bg-gradient-to-b from-black/0 to-black" aria-hidden />
 
       {/* Image 1 */}
       <FadeInOnView>
@@ -241,9 +229,10 @@ export default function VerseTwo() {
         />
       </FadeInOnView>
 
+      {/* Smaller spacer into the text (matches homepage feel) */}
       <SpacerTextLead h={56} />
 
-      {/* Poetic text block */}
+      {/* Text block (tight) */}
       <FadeInOnView delay={80}>
         <div
           className="relative flex items-center justify-center"
@@ -268,6 +257,8 @@ export default function VerseTwo() {
         </div>
       </FadeInOnView>
 
+      {/* No divider immediately after text */}
+
       {/* Image 2 */}
       <FadeInOnView delay={120}>
         <StickyImageSection
@@ -277,6 +268,7 @@ export default function VerseTwo() {
         />
       </FadeInOnView>
 
+      {/* Divider before closing video */}
       <SpacerToSolid h={84} />
 
       {/* Closing video */}
@@ -284,6 +276,7 @@ export default function VerseTwo() {
         <FullscreenVideo src={END_VIDEO} />
       </FadeInOnView>
 
+      {/* Divider before button */}
       <SpacerToSolid h={72} />
 
       {/* Back home button */}
